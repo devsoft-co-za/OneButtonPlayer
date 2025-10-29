@@ -1,3 +1,27 @@
+# Android
+.gradle/
+.idea/
+local.properties
+*.iml
+*.apk
+*.ap_
+*.dex
+*.class
+
+# Build
+build/
+app/build/
+
+# Gradle
+.gradle-wrapper.jar
+
+# Android Studio
+captures/
+.navigation/
+
+# VS Code
+.vscode/
+
+# Aider
 .aider*
-.vscode*
 context.txt
