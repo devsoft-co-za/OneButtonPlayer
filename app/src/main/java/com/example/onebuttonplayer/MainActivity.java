@@ -1,15 +1,39 @@
 package com.example.onebuttonplayer;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
     
     private WebView webView;
+    private ValueCallback<Uri[]> filePathCallback;
+    
+    // Activity result launcher for file picker
+    private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (filePathCallback != null) {
+                Uri[] results = null;
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri data = result.getData().getData();
+                    if (data != null) {
+                        results = new Uri[]{data};
+                    }
+                }
+                filePathCallback.onReceiveValue(results);
+                filePathCallback = null;
+            }
+        }
+    );
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +63,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, 
+                                           ValueCallback<Uri[]> filePathCallback, 
+                                           FileChooserParams fileChooserParams) {
+                MainActivity.this.filePathCallback = filePathCallback;
+                
+                Intent intent = fileChooserParams.createIntent();
+                // Set MIME type filter for audio files
+                intent.setType("audio/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/mpeg", "audio/mp3", "audio/*"});
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                
+                try {
+                    filePickerLauncher.launch(intent);
+                    return true;
+                } catch (Exception e) {
+                    filePathCallback.onReceiveValue(null);
+                    return false;
+                }
+            }
+        });
         
         // Load local HTML file
         webView.loadUrl("file:///android_asset/index.html");

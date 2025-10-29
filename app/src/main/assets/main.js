@@ -78,21 +78,42 @@ function init() {
     }
 }
 
-// File Selection (Placeholder - would need Android WebView integration)
-// File Selection (Android WebView integration)
+// File Selection - Triggers Android file picker via WebView
 function selectFiles() {
-    // This will trigger the Android file picker through WebView
-    // For now, we'll use the actual song.mp3 file that exists
-    const availableFiles = [
-        { name: 'song.mp3', path: 'file:///android_asset/song.mp3' }
-    ];
+    console.log('Opening Android file picker...');
     
-    selectedFiles = availableFiles;
-    updateSelectedFilesList();
-    updateEventTrackDropdown();
+    // Create a hidden file input element to trigger the Android file picker
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'audio/*,.mp3,.m4a,.wav,.ogg';
+    fileInput.multiple = true;
     
-    // Show success message
-    alert('Selected song.mp3 from assets folder');
+    fileInput.addEventListener('change', function(event) {
+        const files = event.target.files;
+        console.log('Files selected:', files.length);
+        
+        if (files.length > 0) {
+            selectedFiles = [];
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileInfo = {
+                    name: file.name,
+                    path: URL.createObjectURL(file),
+                    file: file
+                };
+                selectedFiles.push(fileInfo);
+            }
+            
+            updateSelectedFilesList();
+            updateEventTrackDropdown();
+            
+            alert(`Selected ${files.length} audio file(s) from Android file system`);
+        }
+    });
+    
+    // Trigger the file picker
+    fileInput.click();
 }
 
 function updateSelectedFilesList() {
@@ -348,6 +369,12 @@ function executeEvent(event) {
     
     if (!audioPlayers[trackId]) {
         audioPlayers[trackId] = new Audio(event.trackPath);
+        
+        // Handle audio loading errors
+        audioPlayers[trackId].addEventListener('error', (e) => {
+            console.error('Audio loading error:', e);
+            alert(`Error loading audio file: ${event.trackName}. Please check file permissions.`);
+        });
     }
     
     const player = audioPlayers[trackId];
@@ -355,7 +382,10 @@ function executeEvent(event) {
     switch (event.type) {
         case 'start':
             player.currentTime = 0;
-            player.play();
+            player.play().catch(e => {
+                console.error('Play error:', e);
+                alert(`Cannot play ${event.trackName}. File may be corrupted or inaccessible.`);
+            });
             break;
         case 'stop':
             player.pause();
@@ -365,7 +395,10 @@ function executeEvent(event) {
             player.pause();
             break;
         case 'resume':
-            player.play();
+            player.play().catch(e => {
+                console.error('Play error:', e);
+                alert(`Cannot play ${event.trackName}. File may be corrupted or inaccessible.`);
+            });
             break;
     }
 }
