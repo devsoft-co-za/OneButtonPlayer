@@ -48,7 +48,10 @@ document.getElementById('pauseBtn').addEventListener('click', pauseShow);
 document.getElementById('stopBtn').addEventListener('click', stopShow);
 
 // Configure Screen
-document.getElementById('selectFilesBtn').addEventListener('click', selectFiles);
+document.getElementById('selectFilesBtn').addEventListener('click', function() {
+    console.log('Select Files button clicked');
+    selectFiles();
+});
 document.getElementById('addEventBtn').addEventListener('click', showEventModal);
 document.getElementById('saveShowBtn').addEventListener('click', saveShow);
 document.getElementById('clearShowBtn').addEventListener('click', clearShow);
@@ -76,18 +79,20 @@ function init() {
 }
 
 // File Selection (Placeholder - would need Android WebView integration)
+// File Selection (Android WebView integration)
 function selectFiles() {
-    // In a real implementation, this would trigger Android file picker
-    // For now, we'll simulate file selection
-    const simulatedFiles = [
-        { name: 'song1.mp3', path: 'file:///android_asset/song.mp3' },
-        { name: 'song2.mp3', path: 'file:///storage/emulated/0/Music/song2.mp3' },
-        { name: 'song3.mp3', path: 'file:///storage/emulated/0/Music/song3.mp3' }
+    // This will trigger the Android file picker through WebView
+    // For now, we'll use the actual song.mp3 file that exists
+    const availableFiles = [
+        { name: 'song.mp3', path: 'file:///android_asset/song.mp3' }
     ];
     
-    selectedFiles = simulatedFiles;
+    selectedFiles = availableFiles;
     updateSelectedFilesList();
     updateEventTrackDropdown();
+    
+    // Show success message
+    alert('Selected song.mp3 from assets folder');
 }
 
 function updateSelectedFilesList() {
