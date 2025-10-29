@@ -48,17 +48,6 @@ h1 {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-.status-indicator.playing {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
-    border-color: #4CAF50;
-}
-
-.status-indicator.paused {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-    color: white;
-    border-color: #ff6b6b;
-}
 
 .status-text {
     font-size: 1.8rem;

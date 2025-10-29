@@ -4,30 +4,26 @@ const statusText = statusIndicator.querySelector('.status-text');
 const statusIcon = statusIndicator.querySelector('.status-icon');
 const eventList = document.getElementById('eventList');
 
-let isPlaying = false;
+let pressCount = 0;
 
 // Add event listener for media play/pause button
 document.addEventListener('keydown', (event) => {
     if (event.key === 'MediaPlayPause') {
         event.preventDefault();
         
-        // Toggle play/pause state
-        isPlaying = !isPlaying;
+        // Increment counter
+        pressCount++;
         
         // Update visual feedback
-        if (isPlaying) {
-            statusText.textContent = 'Playing';
-            statusIcon.textContent = '▶️';
-            statusIndicator.classList.add('playing');
-            statusIndicator.classList.remove('paused');
-            logEvent('Play button pressed');
-        } else {
-            statusText.textContent = 'Paused';
-            statusIcon.textContent = '⏸️';
-            statusIndicator.classList.add('paused');
-            statusIndicator.classList.remove('playing');
-            logEvent('Pause button pressed');
-        }
+        statusText.textContent = `Button Pressed: ${pressCount}`;
+        statusIcon.textContent = '🎵';
+        
+        // Generate random color
+        const randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+        statusIndicator.style.background = `linear-gradient(135deg, ${randomColor}, ${randomColor}99)`;
+        statusIndicator.style.borderColor = randomColor;
+        
+        logEvent(`Play/Pause button pressed ${pressCount}`);
         
         // Add visual feedback animation
         statusIndicator.classList.add('active');
