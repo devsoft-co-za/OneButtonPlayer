@@ -87,12 +87,14 @@ function selectFiles() {
     fileInput.type = 'file';
     fileInput.accept = 'audio/*,.mp3,.m4a,.wav,.ogg';
     fileInput.multiple = true;
+    fileInput.setAttribute('multiple', 'multiple');
     
     fileInput.addEventListener('change', function(event) {
         const files = event.target.files;
         console.log('Files selected:', files.length);
         
         if (files.length > 0) {
+            // Clear existing files and add new ones
             selectedFiles = [];
             
             for (let i = 0; i < files.length; i++) {
@@ -100,7 +102,8 @@ function selectFiles() {
                 const fileInfo = {
                     name: file.name,
                     path: URL.createObjectURL(file),
-                    file: file
+                    file: file,
+                    index: i
                 };
                 selectedFiles.push(fileInfo);
             }
@@ -197,6 +200,11 @@ function saveShow() {
     
     if (!showName) {
         alert('Please enter a show name');
+        return;
+    }
+    
+    if (selectedFiles.length === 0) {
+        alert('Please select at least one MP3 file');
         return;
     }
     

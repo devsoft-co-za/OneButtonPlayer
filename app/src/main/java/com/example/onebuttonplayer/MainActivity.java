@@ -24,9 +24,17 @@ public class MainActivity extends AppCompatActivity {
             if (filePathCallback != null) {
                 Uri[] results = null;
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Uri data = result.getData().getData();
-                    if (data != null) {
-                        results = new Uri[]{data};
+                    Intent data = result.getData();
+                    if (data.getClipData() != null) {
+                        // Multiple files selected
+                        int count = data.getClipData().getItemCount();
+                        results = new Uri[count];
+                        for (int i = 0; i < count; i++) {
+                            results[i] = data.getClipData().getItemAt(i).getUri();
+                        }
+                    } else if (data.getData() != null) {
+                        // Single file selected
+                        results = new Uri[]{data.getData()};
                     }
                 }
                 filePathCallback.onReceiveValue(results);
