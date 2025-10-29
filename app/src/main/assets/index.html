@@ -3,23 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Event Tracker</title>
+    <title>One Button Player</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Media Event Tracker</h1>
-        <div class="status-container">
-            <div class="status-indicator" id="statusIndicator">
-                <div class="status-text">Waiting for media button...</div>
-                <div class="status-icon">🎵</div>
+    <!-- Navigation -->
+    <nav class="nav-menu">
+        <button class="nav-btn active" data-screen="play">Play</button>
+        <button class="nav-btn" data-screen="configure">Configure</button>
+        <button class="nav-btn" data-screen="load">Load</button>
+    </nav>
+
+    <!-- Play Screen -->
+    <div id="play-screen" class="screen active">
+        <div class="container">
+            <h1>One Button Player</h1>
+            <div class="status-container">
+                <div class="status-indicator" id="statusIndicator">
+                    <div class="status-text">Ready to Play</div>
+                    <div class="status-icon">🎵</div>
+                </div>
+                <div class="current-show" id="currentShow">
+                    <h3>Current Show: <span id="showName">None</span></h3>
+                    <div class="show-info">
+                        <p>Events: <span id="eventCount">0</span></p>
+                        <p>Status: <span id="playStatus">Stopped</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="playBtn" class="control-btn">▶ Play</button>
+                <button id="pauseBtn" class="control-btn">⏸ Pause</button>
+                <button id="stopBtn" class="control-btn">⏹ Stop</button>
             </div>
         </div>
-        <div class="event-log" id="eventLog">
-            <h3>Recent Events:</h3>
-            <ul id="eventList"></ul>
+    </div>
+
+    <!-- Configure Screen -->
+    <div id="configure-screen" class="screen">
+        <div class="container">
+            <h1>Configure Show</h1>
+            <div class="config-section">
+                <h3>Show Name</h3>
+                <input type="text" id="showNameInput" placeholder="Enter show name">
+            </div>
+            <div class="config-section">
+                <h3>Select MP3 Files</h3>
+                <button id="selectFilesBtn" class="control-btn">📁 Select MP3 Files</button>
+                <div id="selectedFiles" class="file-list"></div>
+            </div>
+            <div class="config-section">
+                <h3>Button Events</h3>
+                <div id="eventsList" class="events-container"></div>
+                <button id="addEventBtn" class="control-btn">➕ Add Event</button>
+            </div>
+            <div class="config-actions">
+                <button id="saveShowBtn" class="control-btn primary">💾 Save Show</button>
+                <button id="clearShowBtn" class="control-btn secondary">🗑 Clear</button>
+            </div>
         </div>
     </div>
+
+    <!-- Load Screen -->
+    <div id="load-screen" class="screen">
+        <div class="container">
+            <h1>Load Show</h1>
+            <div id="showsList" class="shows-container">
+                <p id="noShowsMessage">No shows configured. Go to Configure screen to create one.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Event</h3>
+            <div class="form-group">
+                <label>Event Type:</label>
+                <select id="eventType">
+                    <option value="start">Start Track</option>
+                    <option value="stop">Stop Track</option>
+                    <option value="pause">Pause Track</option>
+                    <option value="resume">Resume Track</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Track:</label>
+                <select id="eventTrack"></select>
+            </div>
+            <div class="modal-actions">
+                <button id="saveEventBtn" class="control-btn primary">Save Event</button>
+                <button id="cancelEventBtn" class="control-btn secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>
