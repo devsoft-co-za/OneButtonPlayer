@@ -88,7 +88,7 @@ public class PlayFragment extends Fragment {
         updatePlayScreen();
     }
 
-    private void stopShow() {
+    public void stopShow() {
         isPlaying = false;
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
