@@ -142,6 +142,10 @@ public class ConfigureFragment extends Fragment {
         if (fileName == null) {
             fileName = "audio_file_" + System.currentTimeMillis();
         }
+        // Extract just the filename from the path
+        if (fileName.contains("/")) {
+            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+        }
         return fileName;
     }
 
