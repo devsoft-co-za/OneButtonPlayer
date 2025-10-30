@@ -115,18 +115,26 @@ public class LoadFragment extends Fragment {
     }
 
     private void loadShow(Show show) {
+        android.util.Log.i("LoadFragment", "Loading show: " + show.getName());
         showManager.setCurrentShow(show);
         Toast.makeText(getContext(), "Loaded show: " + show.getName(), Toast.LENGTH_SHORT).show();
 
         // Reset play state by explicitly calling stopShow()
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
+            android.util.Log.i("LoadFragment", "Activity found, getting PlayFragment");
             PlayFragment playFragment = activity.getCurrentPlayFragment();
             if (playFragment != null) {
+                android.util.Log.i("LoadFragment", "PlayFragment found, calling stopShow()");
                 playFragment.stopShow(); // Explicitly call the stop button function
+            } else {
+                android.util.Log.w("LoadFragment", "PlayFragment is null!");
             }
             
+            android.util.Log.i("LoadFragment", "Switching to play tab");
             activity.getViewPager().setCurrentItem(0); // Switch to play tab
+        } else {
+            android.util.Log.w("LoadFragment", "Activity is null!");
         }
     }
 

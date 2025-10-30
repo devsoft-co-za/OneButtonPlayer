@@ -89,9 +89,11 @@ public class PlayFragment extends Fragment {
     }
 
     public void stopShow() {
+        android.util.Log.i("PlayFragment", "stopShow() called - resetting play state");
         isPlaying = false;
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
+        android.util.Log.i("PlayFragment", "stopShow() - isPlaying=" + isPlaying + ", currentEventIndex=" + currentEventIndex);
         updatePlayScreen();
     }
 
@@ -107,6 +109,8 @@ public class PlayFragment extends Fragment {
         android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
 
         Show currentShow = showManager.getCurrentShow();
+        
+        android.util.Log.i("PlayFragment", "updatePlayScreen() - currentShow=" + currentShow + ", isPlaying=" + isPlaying);
         
         // Always try to load the last show if none is currently set
         if (currentShow == null) {
