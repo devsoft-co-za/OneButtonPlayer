@@ -138,14 +138,40 @@ public class ConfigureFragment extends Fragment {
     }
 
     private String getFileNameFromUri(Uri uri) {
-        String fileName = uri.getLastPathSegment();
+        String fileName = null;
+        
+        // Try to get display name from content resolver first
+        String[] projection = { android.provider.MediaStore.MediaColumns.DISPLAY_NAME };
+        try (android.database.Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
+                if (nameIndex != -1) {
+                    fileName = cursor.getString(nameIndex);
+                }
+            }
+        } catch (Exception e) {
+            // Fall back to other methods
+        }
+        
+        // If display name not available, try to extract from path
         if (fileName == null) {
-            fileName = "audio_file_" + System.currentTimeMillis();
+            fileName = uri.getLastPathSegment();
+            if (fileName == null) {
+                fileName = "audio_file_" + System.currentTimeMillis();
+            }
+            // Extract just the filename from the path (after the last '/')
+            if (fileName.contains("/")) {
+                fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+            }
         }
-        // Extract just the filename from the path
-        if (fileName.contains("/")) {
-            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+        
+        // Decode URL-encoded characters
+        try {
+            fileName = java.net.URLDecoder.decode(fileName, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            // If decoding fails, use the original filename
         }
+        
         return fileName;
     }
 
