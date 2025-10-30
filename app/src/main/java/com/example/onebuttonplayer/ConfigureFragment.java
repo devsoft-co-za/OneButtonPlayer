@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 
+// Import custom classes
+import com.example.onebuttonplayer.ShowManager;
+
 public class ConfigureFragment extends Fragment {
     private ShowManager showManager;
 

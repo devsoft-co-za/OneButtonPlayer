@@ -9,6 +9,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
+// Import custom classes
+import com.example.onebuttonplayer.ShowManager;
+import com.example.onebuttonplayer.AudioPlayerManager;
+
 public class PlayFragment extends Fragment {
     private ShowManager showManager;
     private AudioPlayerManager audioPlayerManager;

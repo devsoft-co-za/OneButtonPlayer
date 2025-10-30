@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
+// Import custom classes
+import com.example.onebuttonplayer.ShowManager;
+
 public class LoadFragment extends Fragment {
 
     private ShowManager showManager;

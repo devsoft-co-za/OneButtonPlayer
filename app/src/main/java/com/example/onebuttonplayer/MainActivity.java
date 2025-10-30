@@ -11,6 +11,13 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+// Import custom classes
+import com.example.onebuttonplayer.ShowManager;
+import com.example.onebuttonplayer.AudioPlayerManager;
+import com.example.onebuttonplayer.PlayFragment;
+import com.example.onebuttonplayer.ConfigureFragment;
+import com.example.onebuttonplayer.LoadFragment;
+
 public class MainActivity extends AppCompatActivity {
     
     private ViewPager2 viewPager;
