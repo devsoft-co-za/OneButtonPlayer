@@ -101,7 +101,8 @@ function selectFiles() {
                 const file = files[i];
                 const fileInfo = {
                     name: file.name,
-                    path: URL.createObjectURL(file),
+                    path: file.webkitRelativePath || file.name, // Use file name or relative path
+                    uri: file.name, // Store the file name for reference
                     file: file,
                     index: i
                 };
@@ -374,9 +375,11 @@ function handleButtonPress() {
 
 function executeEvent(event) {
     const trackId = event.trackIndex;
+    const track = selectedFiles[trackId];
     
     if (!audioPlayers[trackId]) {
-        audioPlayers[trackId] = new Audio(event.trackPath);
+        // Use the actual File object for playback
+        audioPlayers[trackId] = new Audio(URL.createObjectURL(track.file));
         
         // Handle audio loading errors
         audioPlayers[trackId].addEventListener('error', (e) => {

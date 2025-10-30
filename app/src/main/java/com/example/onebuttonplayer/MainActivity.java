@@ -11,6 +11,10 @@ import android.webkit.WebViewClient;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.ContentResolver;
+import android.provider.DocumentsContract;
+import android.util.Log;
+
 
 public class MainActivity extends AppCompatActivity {
     
@@ -30,11 +34,19 @@ public class MainActivity extends AppCompatActivity {
                         int count = data.getClipData().getItemCount();
                         results = new Uri[count];
                         for (int i = 0; i < count; i++) {
-                            results[i] = data.getClipData().getItemAt(i).getUri();
+                            Uri uri = data.getClipData().getItemAt(i).getUri();
+                            // Take persistent permission for the URI
+                            getContentResolver().takePersistableUriPermission(uri, 
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            results[i] = uri;
                         }
                     } else if (data.getData() != null) {
                         // Single file selected
-                        results = new Uri[]{data.getData()};
+                        Uri uri = data.getData();
+                        // Take persistent permission for the URI
+                        getContentResolver().takePersistableUriPermission(uri, 
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        results = new Uri[]{uri};
                     }
                 }
                 filePathCallback.onReceiveValue(results);
