@@ -1,0 +1,97 @@
+package com.example.onebuttonplayer;
+
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.util.Log;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class AudioPlayerManager {
+    private final Context context;
+    private final Map<Integer, MediaPlayer> players;
+    private boolean isPlaying = false;
+    private int currentEventIndex = 0;
+
+    public AudioPlayerManager(Context context) {
+        this.context = context;
+        this.players = new HashMap<>();
+    }
+
+    public void playTrack(int trackIndex, String uri) {
+        try {
+            // Stop any currently playing track
+            stopAll();
+
+            MediaPlayer player = new MediaPlayer();
+            player.setDataSource(context, Uri.parse(uri));
+            player.prepare();
+            player.start();
+
+            players.put(trackIndex, player);
+            isPlaying = true;
+
+        } catch (Exception e) {
+            Log.e("AudioPlayerManager", "Error playing track: " + uri, e);
+        }
+    }
+
+    public void pauseTrack(int trackIndex) {
+        MediaPlayer player = players.get(trackIndex);
+        if (player != null && player.isPlaying()) {
+            player.pause();
+        }
+    }
+
+    public void resumeTrack(int trackIndex) {
+        MediaPlayer player = players.get(trackIndex);
+        if (player != null && !player.isPlaying()) {
+            player.start();
+        }
+    }
+
+    public void stopTrack(int trackIndex) {
+        MediaPlayer player = players.get(trackIndex);
+        if (player != null) {
+            player.stop();
+            player.release();
+            players.remove(trackIndex);
+        }
+    }
+
+    public void pauseAll() {
+        for (MediaPlayer player : players.values()) {
+            if (player.isPlaying()) {
+                player.pause();
+            }
+        }
+        isPlaying = false;
+    }
+
+    public void stopAll() {
+        for (MediaPlayer player : players.values()) {
+            player.stop();
+            player.release();
+        }
+        players.clear();
+        isPlaying = false;
+        currentEventIndex = 0;
+    }
+
+    public void cleanup() {
+        stopAll();
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public int getCurrentEventIndex() {
+        return currentEventIndex;
+    }
+
+    public void setCurrentEventIndex(int index) {
+        currentEventIndex = index;
+    }
+}

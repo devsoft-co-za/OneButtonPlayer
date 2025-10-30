@@ -7,75 +7,45 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
 
 public class LoadFragment extends Fragment {
+
     private ShowManager showManager;
-    private androidx.recyclerview.widget.RecyclerView showsRecyclerView;
-    private TextView noShowsMessage;
+    private RecyclerView recyclerView;
+    private ShowAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_load, container, false);
 
-        // Get managers from MainActivity
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
             showManager = activity.getShowManager();
         }
 
-        // Setup RecyclerView
-        setupRecyclerView(view);
+        recyclerView = view.findViewById(R.id.showsRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        adapter = new ShowAdapter(showManager.getShows());
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadShowsList();
-    }
+    private class ShowAdapter extends RecyclerView.Adapter<ShowAdapter.ShowViewHolder> {
 
-    private void setupRecyclerView(View view) {
-        showsRecyclerView = view.findViewById(R.id.showsRecyclerView);
-        noShowsMessage = view.findViewById(R.id.noShowsMessage);
+        private List<Show> shows;
 
-        // Setup RecyclerView with LinearLayoutManager
-        androidx.recyclerview.widget.LinearLayoutManager layoutManager = new androidx.recyclerview.widget.LinearLayoutManager(getContext());
-        showsRecyclerView.setLayoutManager(layoutManager);
-
-        // Create and set adapter
-        ShowAdapter adapter = new ShowAdapter();
-        showsRecyclerView.setAdapter(adapter);
-    }
-
-    private void loadShowsList() {
-        java.util.List<Show> shows = showManager.getShows();
-        ShowAdapter adapter = (ShowAdapter) showsRecyclerView.getAdapter();
-        
-        if (adapter != null) {
-            adapter.setShows(shows);
-            
-            if (shows.isEmpty()) {
-                noShowsMessage.setVisibility(android.view.View.VISIBLE);
-                showsRecyclerView.setVisibility(android.view.View.GONE);
-            } else {
-                noShowsMessage.setVisibility(android.view.View.GONE);
-                showsRecyclerView.setVisibility(android.view.View.VISIBLE);
-            }
-        }
-    }
-
-    private class ShowAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<ShowAdapter.ShowViewHolder> {
-        private java.util.List<Show> shows = new java.util.ArrayList<>();
-
-        public void setShows(java.util.List<Show> shows) {
+        public ShowAdapter(List<Show> shows) {
             this.shows = shows;
-            notifyDataSetChanged();
         }
 
         @Override
         public ShowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = android.view.LayoutInflater.from(parent.getContext()).inflate(R.layout.item_show, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_show, parent, false);
             return new ShowViewHolder(view);
         }
 
@@ -90,7 +60,7 @@ public class LoadFragment extends Fragment {
             return shows.size();
         }
 
-        class ShowViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+        class ShowViewHolder extends RecyclerView.ViewHolder {
             private TextView showName;
             private TextView eventCount;
             private TextView createdDate;
@@ -103,7 +73,7 @@ public class LoadFragment extends Fragment {
 
                 itemView.setOnClickListener(v -> {
                     int position = getAdapterPosition();
-                    if (position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+                    if (position != RecyclerView.NO_POSITION) {
                         Show show = shows.get(position);
                         loadShow(show);
                     }
@@ -121,7 +91,7 @@ public class LoadFragment extends Fragment {
     private void loadShow(Show show) {
         showManager.setCurrentShow(show);
         Toast.makeText(getContext(), "Loaded show: " + show.getName(), Toast.LENGTH_SHORT).show();
-        
+
         // Switch to play screen
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
