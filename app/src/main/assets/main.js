@@ -138,7 +138,9 @@ function selectFiles() {
                     path: file.webkitRelativePath || file.name, // Use file name or relative path
                     uri: file.name, // Store the file name for reference
                     file: file, // Keep File object for current session
-                    index: i
+                    index: i,
+                    // Store the actual file URI for persistent access
+                    persistentUri: file.webkitRelativePath || file.name
                 };
                 selectedFiles.push(fileInfo);
             }
@@ -253,7 +255,8 @@ function saveShow() {
         name: file.name,
         path: file.path,
         uri: file.uri,
-        index: file.index
+        index: file.index,
+        persistentUri: file.persistentUri
         // Note: file.file (File object) is intentionally omitted as it doesn't persist
     }));
     
@@ -465,6 +468,10 @@ function executeEvent(event) {
             if (track.file) {
                 // Use the actual File object for playback (current session)
                 audioPlayers[trackId] = new Audio(URL.createObjectURL(track.file));
+            } else if (track.persistentUri) {
+                // Try to use persistent URI for loaded shows
+                console.log('Attempting to play track using persistent URI:', track.persistentUri);
+                audioPlayers[trackId] = new Audio(track.persistentUri);
             } else {
                 // For loaded shows, we need to re-select the files
                 console.warn('File object not available for track:', track.name);

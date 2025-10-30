@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 getContentResolver().takePersistableUriPermission(uri, 
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                Log.i("MainActivity", "Persistent permission granted for: " + uri);
                             } catch (SecurityException e) {
                                 Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
                                 // Continue without persistent permission - WebView will handle it
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             getContentResolver().takePersistableUriPermission(uri, 
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            Log.i("MainActivity", "Persistent permission granted for: " + uri);
                         } catch (SecurityException e) {
                             Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
                             // Continue without persistent permission - WebView will handle it
@@ -80,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAllowContentAccess(true);
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        
+        // Enable file access from file URLs for persistent URI access
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
         
         // Enable hardware acceleration for better performance
         webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null);
