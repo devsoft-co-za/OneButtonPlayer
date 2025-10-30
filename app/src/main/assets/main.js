@@ -62,10 +62,44 @@ document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
 
 // Bluetooth/Media Button Event Handler
 document.addEventListener('keydown', (event) => {
-    if (event.key === 'MediaPlayPause') {
+    console.log('Key pressed:', event.key, event.code, event.keyCode);
+    
+    // Handle various media button codes
+    if (event.key === 'MediaPlayPause' || 
+        event.code === 'MediaPlayPause' || 
+        event.keyCode === 179 || // Standard media play/pause key code
+        event.keyCode === 85 || // Additional media button code
+        event.code === 'KeyM' || // Fallback for testing
+        event.key === ' ' || // Space bar for testing
+        event.code === 'Space') {
+        
+        console.log('Media button detected, handling button press...');
         event.preventDefault();
+        event.stopPropagation();
         handleButtonPress();
     }
+});
+
+// Alternative event listener for Android WebView
+window.addEventListener('keydown', (event) => {
+    console.log('Window keydown:', event.key, event.code, event.keyCode);
+    
+    if (event.key === 'MediaPlayPause' || 
+        event.code === 'MediaPlayPause' || 
+        event.keyCode === 179 ||
+        event.keyCode === 85) {
+        
+        console.log('Window media button detected');
+        event.preventDefault();
+        event.stopPropagation();
+        handleButtonPress();
+    }
+});
+
+// Add focus to the document to ensure key events are captured
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.focus();
+    console.log('Document focused for key events');
 });
 
 // Initialize
