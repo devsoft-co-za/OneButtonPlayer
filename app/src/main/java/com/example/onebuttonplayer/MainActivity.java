@@ -3,155 +3,245 @@ package com.example.onebuttonplayer;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import android.content.ContentResolver;
-import android.provider.DocumentsContract;
-import android.util.Log;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     
-    private WebView webView;
-    private ValueCallback<Uri[]> filePathCallback;
+    private ViewPager2 viewPager;
+    private TabLayout tabLayout;
+    private ShowManager showManager;
+    private AudioPlayerManager audioPlayerManager;
     
-    // Activity result launcher for file picker
-    private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
-        new ActivityResultContracts.StartActivityForResult(),
-        result -> {
-            if (filePathCallback != null) {
-                Uri[] results = null;
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Intent data = result.getData();
-                    if (data.getClipData() != null) {
-                        // Multiple files selected
-                        int count = data.getClipData().getItemCount();
-                        results = new Uri[count];
-                        for (int i = 0; i < count; i++) {
-                            Uri uri = data.getClipData().getItemAt(i).getUri();
-                            // Take persistent permission for the URI (with error handling)
-                            try {
-                                getContentResolver().takePersistableUriPermission(uri, 
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                Log.i("MainActivity", "Persistent permission granted for: " + uri);
-                            } catch (SecurityException e) {
-                                Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
-                                // Continue without persistent permission - WebView will handle it
-                            }
-                            results[i] = uri;
-                        }
-                    } else if (data.getData() != null) {
-                        // Single file selected
-                        Uri uri = data.getData();
-                        // Take persistent permission for the URI (with error handling)
-                        try {
-                            getContentResolver().takePersistableUriPermission(uri, 
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            Log.i("MainActivity", "Persistent permission granted for: " + uri);
-                        } catch (SecurityException e) {
-                            Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
-                            // Continue without persistent permission - WebView will handle it
-                        }
-                        results = new Uri[]{uri};
-                    }
-                }
-                filePathCallback.onReceiveValue(results);
-                filePathCallback = null;
-            }
-        }
-    );
+    // Tab titles
+    private final String[] tabTitles = {"Play", "Configure", "Load"};
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         
-        webView = new WebView(this);
-        setContentView(webView);
+        // Initialize managers
+        showManager = new ShowManager(this);
+        audioPlayerManager = new AudioPlayerManager(this);
         
-        // Configure WebView for best practices
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setAllowFileAccess(true);
-        webSettings.setAllowContentAccess(true);
-        webSettings.setMediaPlaybackRequiresUserGesture(false);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        // Setup ViewPager and TabLayout
+        setupViewPager();
         
-        // Enable file access from file URLs for persistent URI access
-        webSettings.setAllowFileAccessFromFileURLs(true);
-        webSettings.setAllowUniversalAccessFromFileURLs(true);
-        
-        // Enable hardware acceleration for better performance
-        webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null);
-        
-        // Set WebView clients
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // Handle external URLs if needed
-                return false;
-            }
-        });
-        
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onShowFileChooser(WebView webView, 
-                                           ValueCallback<Uri[]> filePathCallback, 
-                                           FileChooserParams fileChooserParams) {
-                MainActivity.this.filePathCallback = filePathCallback;
-                
-                Intent intent = fileChooserParams.createIntent();
-                // Set MIME type filter for audio files
-                intent.setType("audio/*");
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/mpeg", "audio/mp3", "audio/*"});
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                
-                try {
-                    filePickerLauncher.launch(intent);
-                    return true;
-                } catch (Exception e) {
-                    filePathCallback.onReceiveValue(null);
-                    return false;
-                }
-            }
-        });
-        
-        // Load local HTML file
-        webView.loadUrl("file:///android_asset/index.html");
+        // Initialize the app
+        initApp();
     }
     
-    @Override
-    public void onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
+    private void setupViewPager() {
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
+        
+        // Create adapter with fragments
+        MainPagerAdapter adapter = new MainPagerAdapter(this);
+        viewPager.setAdapter(adapter);
+        
+        // Connect TabLayout with ViewPager
+        new TabLayoutMediator(tabLayout, viewPager,
+            (tab, position) -> tab.setText(tabTitles[position])
+        ).attach();
+    }
+    
+    private void initApp() {
+        // Load last used show if available
+        showManager.loadLastShow();
+        
+        // Update UI based on current state
+        updateUI();
+    }
+    
+    private void updateUI() {
+        // This will be called from fragments to update the main UI
+        // For now, just log the current state
+        if (showManager.getCurrentShow() != null) {
+            Log.i("MainActivity", "Current show: " + showManager.getCurrentShow().getName());
         }
+    }
+    
+    // Getters for managers
+    public ShowManager getShowManager() {
+        return showManager;
+    }
+    
+    public AudioPlayerManager getAudioPlayerManager() {
+        return audioPlayerManager;
     }
     
     @Override
     protected void onPause() {
         super.onPause();
-        webView.onPause();
-    }
-    
-    @Override
-    protected void onResume() {
-        super.onResume();
-        webView.onResume();
+        audioPlayerManager.pauseAll();
     }
     
     @Override
     protected void onDestroy() {
-        if (webView != null) {
-            webView.destroy();
-        }
         super.onDestroy();
+        audioPlayerManager.cleanup();
     }
+}
+// Fragment classes
+class PlayFragment extends Fragment {
+    private ShowManager showManager;
+    private AudioPlayerManager audioPlayerManager;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_play, container, false);
+
+        // Get managers from MainActivity
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            showManager = activity.getShowManager();
+            audioPlayerManager = activity.getAudioPlayerManager();
+        }
+
+        // Setup UI components
+        setupPlayControls(view);
+        updatePlayScreen();
+
+        return view;
+    }
+
+    private void setupPlayControls(View view) {
+        Button playBtn = view.findViewById(R.id.playBtn);
+        Button pauseBtn = view.findViewById(R.id.pauseBtn);
+        Button stopBtn = view.findViewById(R.id.stopBtn);
+
+        playBtn.setOnClickListener(v -> startShow());
+        pauseBtn.setOnClickListener(v -> pauseShow());
+        stopBtn.setOnClickListener(v -> stopShow());
+    }
+
+    private void startShow() {
+        // Implementation
+    }
+
+    private void pauseShow() {
+        // Implementation
+    }
+
+    private void stopShow() {
+        // Implementation
+    }
+
+    private void updatePlayScreen() {
+        // Implementation
+    }
+}
+
+class ConfigureFragment extends Fragment {
+    // Implementation for configure screen
+}
+
+class LoadFragment extends Fragment {
+    // Implementation for load screen
+}
+
+// Pager Adapter
+class MainPagerAdapter extends FragmentStateAdapter {
+
+    public MainPagerAdapter(FragmentActivity fragmentActivity) {
+        super(fragmentActivity);
+    }
+
+    @Override
+    public Fragment createFragment(int position) {
+        switch (position) {
+            case 0:
+                return new PlayFragment();
+            case 1:
+                return new ConfigureFragment();
+            case 2:
+                return new LoadFragment();
+            default:
+                return new PlayFragment();
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return 3;
+    }
+}
+// Data model classes
+class Show {
+    private String id;
+    private String name;
+    private List<ShowFile> files;
+    private List<ShowEvent> events;
+    private String created;
+
+    public Show(String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.files = new ArrayList<>();
+        this.events = new ArrayList<>();
+        this.created = new Date().toString();
+    }
+
+    // Getters and setters
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public List<ShowFile> getFiles() { return files; }
+    public List<ShowEvent> getEvents() { return events; }
+    public String getCreated() { return created; }
+
+    public void setName(String name) { this.name = name; }
+    public void setFiles(List<ShowFile> files) { this.files = files; }
+    public void setEvents(List<ShowEvent> events) { this.events = events; }
+}
+
+class ShowFile {
+    private String name;
+    private String uri;
+    private int index;
+
+    public ShowFile(String name, String uri, int index) {
+        this.name = name;
+        this.uri = uri;
+        this.index = index;
+    }
+
+    // Getters
+    public String getName() { return name; }
+    public String getUri() { return uri; }
+    public int getIndex() { return index; }
+}
+
+class ShowEvent {
+    private String type; // "start", "stop", "pause", "resume"
+    private int trackIndex;
+    private String trackName;
+
+    public ShowEvent(String type, int trackIndex, String trackName) {
+        this.type = type;
+        this.trackIndex = trackIndex;
+        this.trackName = trackName;
+    }
+
+    // Getters
+    public String getType() { return type; }
+    public int getTrackIndex() { return trackIndex; }
+    public String getTrackName() { return trackName; }
 }
