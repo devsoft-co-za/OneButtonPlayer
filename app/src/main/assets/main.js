@@ -302,6 +302,9 @@ function loadShowsList() {
 function loadShow(show) {
     currentShow = show;
     localStorage.setItem('lastShowId', show.id);
+    
+    // Reset selectedFiles to match the loaded show
+    selectedFiles = show.files || [];
     updatePlayScreen();
     
     // Switch to play screen
@@ -421,17 +424,45 @@ function handleButtonPress() {
 
 function executeEvent(event) {
     const trackId = event.trackIndex;
-    const track = selectedFiles[trackId];
+    
+    // Check if we have the track in selectedFiles (for current session)
+    // or if we need to use the show's stored file data
+    let track = selectedFiles[trackId];
+    
+    if (!track && currentShow && currentShow.files && currentShow.files[trackId]) {
+        // Use the stored file data from the show
+        track = currentShow.files[trackId];
+    }
+    
+    if (!track) {
+        console.error('Track not found for event:', event);
+        alert(`Error: Audio file "${event.trackName}" not found. Please reload the show.`);
+        return;
+    }
     
     if (!audioPlayers[trackId]) {
-        // Use the actual File object for playback
-        audioPlayers[trackId] = new Audio(URL.createObjectURL(track.file));
-        
-        // Handle audio loading errors
-        audioPlayers[trackId].addEventListener('error', (e) => {
-            console.error('Audio loading error:', e);
-            alert(`Error loading audio file: ${event.trackName}. Please check file permissions.`);
-        });
+        // Try to create audio player with the file
+        try {
+            if (track.file) {
+                // Use the actual File object for playback (current session)
+                audioPlayers[trackId] = new Audio(URL.createObjectURL(track.file));
+            } else {
+                // For loaded shows, we need to re-select the files
+                console.warn('File object not available for track:', track.name);
+                alert(`Cannot play "${event.trackName}". Please re-select the audio files for this show.`);
+                return;
+            }
+            
+            // Handle audio loading errors
+            audioPlayers[trackId].addEventListener('error', (e) => {
+                console.error('Audio loading error:', e);
+                alert(`Error loading audio file: ${event.trackName}. Please check file permissions.`);
+            });
+        } catch (error) {
+            console.error('Error creating audio player:', error);
+            alert(`Cannot play ${event.trackName}. File may be corrupted or inaccessible.`);
+            return;
+        }
     }
     
     const player = audioPlayers[trackId];
