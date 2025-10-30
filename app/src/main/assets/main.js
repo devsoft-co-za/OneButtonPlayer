@@ -318,8 +318,18 @@ function updatePlayScreen() {
         eventCount.textContent = currentShow.events.length;
         playStatus.textContent = isPlaying ? 'Playing' : 'Stopped';
         
-        statusText.textContent = 'Ready to Play';
-        statusIcon.textContent = '🎵';
+        // Update status indicator based on play state
+        if (isPlaying) {
+            statusText.textContent = 'Playing Show';
+            statusIcon.textContent = '▶';
+            statusIndicator.style.cursor = 'pointer';
+            statusIndicator.addEventListener('click', handleStatusClick);
+        } else {
+            statusText.textContent = 'Ready to Play';
+            statusIcon.textContent = '🎵';
+            statusIndicator.style.cursor = 'default';
+            statusIndicator.removeEventListener('click', handleStatusClick);
+        }
     } else {
         showName.textContent = 'None';
         eventCount.textContent = '0';
@@ -327,6 +337,8 @@ function updatePlayScreen() {
         
         statusText.textContent = 'No Show Loaded';
         statusIcon.textContent = '❌';
+        statusIndicator.style.cursor = 'default';
+        statusIndicator.removeEventListener('click', handleStatusClick);
     }
 }
 
@@ -340,9 +352,6 @@ function startShow() {
     isPlaying = true;
     currentEventIndex = 0;
     updatePlayScreen();
-    
-    statusText.textContent = 'Playing Show';
-    statusIcon.textContent = '▶';
     
     // Visual feedback
     statusIndicator.classList.add('active');
@@ -360,8 +369,6 @@ function pauseShow() {
     });
     
     updatePlayScreen();
-    statusText.textContent = 'Paused';
-    statusIcon.textContent = '⏸';
 }
 
 function stopShow() {
@@ -377,11 +384,16 @@ function stopShow() {
     });
     
     updatePlayScreen();
-    statusText.textContent = 'Stopped';
-    statusIcon.textContent = '⏹';
 }
 
 // Button Press Handler
+// Status Indicator Click Handler
+function handleStatusClick() {
+    if (isPlaying && currentShow) {
+        console.log('Status indicator clicked - triggering next event');
+        handleButtonPress();
+    }
+}
 function handleButtonPress() {
     if (!isPlaying || !currentShow) return;
     
