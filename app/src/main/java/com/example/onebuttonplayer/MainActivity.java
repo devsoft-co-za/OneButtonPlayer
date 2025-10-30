@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,10 @@ public class MainActivity extends AppCompatActivity {
     
     public AudioPlayerManager getAudioPlayerManager() {
         return audioPlayerManager;
+    }
+    
+    public ViewPager2 getViewPager() {
+        return viewPager;
     }
     
     // Media button handling for hardware controls
@@ -241,7 +246,7 @@ class PlayFragment extends Fragment {
         }
     }
 
-    private void handleButtonPress() {
+    public void handleButtonPress() {
         if (!isPlaying || showManager.getCurrentShow() == null) return;
 
         Show currentShow = showManager.getCurrentShow();
@@ -700,7 +705,7 @@ class LoadFragment extends Fragment {
         // Switch to play screen
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.viewPager.setCurrentItem(0); // Switch to play tab
+            activity.getViewPager().setCurrentItem(0); // Switch to play tab
         }
     }
 }
