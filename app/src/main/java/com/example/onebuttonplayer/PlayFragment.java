@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 // Import custom classes
 import com.example.onebuttonplayer.ShowManager;
 import com.example.onebuttonplayer.AudioPlayerManager;
+import com.example.onebuttonplayer.Show;
+import java.util.List;
 
 public class PlayFragment extends Fragment {
     private ShowManager showManager;
@@ -115,12 +117,19 @@ public class PlayFragment extends Fragment {
                 statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null));
             }
         } else {
-            showName.setText("None");
+            // Check if there are any saved shows
+            List<Show> savedShows = showManager.getShows();
+            if (savedShows.isEmpty()) {
+                showName.setText("No Shows");
+                statusText.setText("No Shows Configured");
+                statusIcon.setText("❌");
+            } else {
+                showName.setText("Select a Show");
+                statusText.setText("Tap Load to Select Show");
+                statusIcon.setText("📂");
+            }
             eventCount.setText("0");
             playStatus.setText("Stopped");
-            
-            statusText.setText("No Show Loaded");
-            statusIcon.setText("❌");
             statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, null));
         }
     }

@@ -31,6 +31,8 @@ public class ConfigureFragment extends Fragment {
     private LinearLayout selectedFilesContainer;
     private LinearLayout eventsListContainer;
     private ActivityResultLauncher<Intent> filePickerLauncher;
+    private String lastEventType = "start";
+    private int lastTrackIndex = 0;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,7 +54,8 @@ public class ConfigureFragment extends Fragment {
             }
         );
 
-        // Setup UI components
+        // Clear current show and setup UI
+        showManager.setCurrentShow(null);
         setupUI(view);
 
         return view;
@@ -171,6 +174,14 @@ public class ConfigureFragment extends Fragment {
             android.R.layout.simple_spinner_item, eventTypes);
         eventTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         eventTypeSpinner.setAdapter(eventTypeAdapter);
+        
+        // Set last selected event type
+        for (int i = 0; i < eventTypes.length; i++) {
+            if (eventTypes[i].equals(lastEventType)) {
+                eventTypeSpinner.setSelection(i);
+                break;
+            }
+        }
 
         // Setup track spinner
         Spinner trackSpinner = dialogView.findViewById(R.id.trackSpinner);
@@ -182,6 +193,11 @@ public class ConfigureFragment extends Fragment {
             android.R.layout.simple_spinner_item, trackNames);
         trackAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         trackSpinner.setAdapter(trackAdapter);
+        
+        // Set last selected track
+        if (lastTrackIndex < trackNames.size()) {
+            trackSpinner.setSelection(lastTrackIndex);
+        }
 
         // Create and show dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -191,6 +207,10 @@ public class ConfigureFragment extends Fragment {
                 String eventType = eventTypeSpinner.getSelectedItem().toString();
                 int trackIndex = trackSpinner.getSelectedItemPosition();
                 String trackName = trackNames.get(trackIndex);
+                
+                // Persist selections for next time
+                lastEventType = eventType;
+                lastTrackIndex = trackIndex;
                 
                 addEventToShow(eventType, trackIndex, trackName);
             })
