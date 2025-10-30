@@ -32,6 +32,13 @@ public class PlayFragment extends Fragment {
             audioPlayerManager = activity.getAudioPlayerManager();
         }
 
+        // Reset play state when fragment is created
+        isPlaying = false;
+        currentEventIndex = 0;
+        if (audioPlayerManager != null) {
+            audioPlayerManager.setCurrentEventIndex(0);
+        }
+
         // Setup UI components
         setupPlayControls(view);
         updatePlayScreen();

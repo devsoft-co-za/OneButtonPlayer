@@ -118,6 +118,14 @@ public class MainActivity extends AppCompatActivity {
                 return (PlayFragment) fragment;
             }
         }
+        
+        // If not found by tag, try to find any existing PlayFragment
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof PlayFragment) {
+                return (PlayFragment) fragment;
+            }
+        }
+        
         return null;
     }
     
