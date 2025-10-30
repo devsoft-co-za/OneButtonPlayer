@@ -57,6 +57,9 @@ public class ConfigureFragment extends Fragment {
         // Clear current show and setup UI
         showManager.setCurrentShow(null);
         setupUI(view);
+        
+        // Clear the file and event lists on startup
+        clearShow();
 
         return view;
     }
