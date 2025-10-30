@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 // Fragment classes
-class PlayFragment extends Fragment {
+public static class PlayFragment extends Fragment {
     private ShowManager showManager;
     private AudioPlayerManager audioPlayerManager;
     private boolean isPlaying = false;
@@ -316,7 +316,7 @@ class PlayFragment extends Fragment {
     }
 }
 
-class ConfigureFragment extends Fragment {
+public static class ConfigureFragment extends Fragment {
     private ShowManager showManager;
     private java.util.List<ShowFile> selectedFiles = new java.util.ArrayList<>();
     private java.util.List<ShowEvent> currentEvents = new java.util.ArrayList<>();
@@ -588,7 +588,7 @@ class ConfigureFragment extends Fragment {
     }
 }
 
-class LoadFragment extends Fragment {
+public static class LoadFragment extends Fragment {
     private ShowManager showManager;
     private androidx.recyclerview.widget.RecyclerView showsRecyclerView;
     private TextView noShowsMessage;
