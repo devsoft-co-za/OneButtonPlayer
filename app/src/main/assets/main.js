@@ -137,7 +137,7 @@ function selectFiles() {
                     name: file.name,
                     path: file.webkitRelativePath || file.name, // Use file name or relative path
                     uri: file.name, // Store the file name for reference
-                    file: file,
+                    file: file, // Keep File object for current session
                     index: i
                 };
                 selectedFiles.push(fileInfo);
@@ -248,10 +248,19 @@ function saveShow() {
         return;
     }
     
+    // Create a clean copy without File objects (which don't persist)
+    const filesForStorage = selectedFiles.map(file => ({
+        name: file.name,
+        path: file.path,
+        uri: file.uri,
+        index: file.index
+        // Note: file.file (File object) is intentionally omitted as it doesn't persist
+    }));
+    
     const show = {
         id: Date.now().toString(),
         name: showName,
-        files: selectedFiles,
+        files: filesForStorage,
         events: [...currentEvents],
         created: new Date().toISOString()
     };
