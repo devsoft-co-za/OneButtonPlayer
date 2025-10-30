@@ -158,6 +158,8 @@ public class PlayFragment extends Fragment {
         if (currentEventIndex >= currentShow.getEvents().size()) {
             // Show completed
             isPlaying = false;
+            currentEventIndex = 0;
+            audioPlayerManager.setCurrentEventIndex(0);
             updatePlayScreen();
             Toast.makeText(getContext(), "Show Complete!", Toast.LENGTH_SHORT).show();
             return;
@@ -225,6 +227,7 @@ public class PlayFragment extends Fragment {
     public void resetPlayState() {
         isPlaying = false;
         currentEventIndex = 0;
+        audioPlayerManager.setCurrentEventIndex(0);
         updatePlayScreen();
     }
 }
