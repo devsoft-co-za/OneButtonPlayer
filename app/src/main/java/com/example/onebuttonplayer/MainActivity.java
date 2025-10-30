@@ -35,17 +35,27 @@ public class MainActivity extends AppCompatActivity {
                         results = new Uri[count];
                         for (int i = 0; i < count; i++) {
                             Uri uri = data.getClipData().getItemAt(i).getUri();
-                            // Take persistent permission for the URI
-                            getContentResolver().takePersistableUriPermission(uri, 
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            // Take persistent permission for the URI (with error handling)
+                            try {
+                                getContentResolver().takePersistableUriPermission(uri, 
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            } catch (SecurityException e) {
+                                Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
+                                // Continue without persistent permission - WebView will handle it
+                            }
                             results[i] = uri;
                         }
                     } else if (data.getData() != null) {
                         // Single file selected
                         Uri uri = data.getData();
-                        // Take persistent permission for the URI
-                        getContentResolver().takePersistableUriPermission(uri, 
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        // Take persistent permission for the URI (with error handling)
+                        try {
+                            getContentResolver().takePersistableUriPermission(uri, 
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } catch (SecurityException e) {
+                            Log.w("MainActivity", "Cannot take persistent permission for URI: " + uri);
+                            // Continue without persistent permission - WebView will handle it
+                        }
                         results = new Uri[]{uri};
                     }
                 }

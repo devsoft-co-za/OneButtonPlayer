@@ -305,6 +305,16 @@ function loadShow(show) {
     
     // Reset selectedFiles to match the loaded show
     selectedFiles = show.files || [];
+    
+    // Clear existing audio players when loading a new show
+    Object.values(audioPlayers).forEach(player => {
+        if (player) {
+            player.pause();
+            player.src = '';
+        }
+    });
+    audioPlayers = {};
+    
     updatePlayScreen();
     
     // Switch to play screen
@@ -466,6 +476,13 @@ function executeEvent(event) {
     }
     
     const player = audioPlayers[trackId];
+    
+    // Check if player is ready
+    if (!player || !player.src) {
+        console.error('Audio player not ready for track:', track.name);
+        alert(`Cannot play ${event.trackName}. Audio player not ready.`);
+        return;
+    }
     
     switch (event.type) {
         case 'start':
