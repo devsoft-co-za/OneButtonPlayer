@@ -729,61 +729,9 @@ class MainPagerAdapter extends FragmentStateAdapter {
     @Override
     public int getItemCount() {
         return 3;
-    private String created;
-
-    public Show(String id, String name) {
-        this.id = id;
-        this.name = name;
-        this.files = new ArrayList<>();
-        this.events = new ArrayList<>();
-        this.created = new Date().toString();
     }
-
-    // Getters and setters
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public List<ShowFile> getFiles() { return files; }
-    public List<ShowEvent> getEvents() { return events; }
-    public String getCreated() { return created; }
-
-    public void setName(String name) { this.name = name; }
-    public void setFiles(List<ShowFile> files) { this.files = files; }
-    public void setEvents(List<ShowEvent> events) { this.events = events; }
 }
 
-class ShowFile {
-    private String name;
-    private String uri;
-    private int index;
-
-    public ShowFile(String name, String uri, int index) {
-        this.name = name;
-        this.uri = uri;
-        this.index = index;
-    }
-
-    // Getters
-    public String getName() { return name; }
-    public String getUri() { return uri; }
-    public int getIndex() { return index; }
-}
-
-class ShowEvent {
-    private String type; // "start", "stop", "pause", "resume"
-    private int trackIndex;
-    private String trackName;
-
-    public ShowEvent(String type, int trackIndex, String trackName) {
-        this.type = type;
-        this.trackIndex = trackIndex;
-        this.trackName = trackName;
-    }
-
-    // Getters
-    public String getType() { return type; }
-    public int getTrackIndex() { return trackIndex; }
-    public String getTrackName() { return trackName; }
-}
 // Data model classes
 class Show {
     private String id;
