@@ -118,19 +118,12 @@ public class LoadFragment extends Fragment {
         showManager.setCurrentShow(show);
         Toast.makeText(getContext(), "Loaded show: " + show.getName(), Toast.LENGTH_SHORT).show();
 
-        // Reset play state
+        // Reset play state by explicitly calling stopShow()
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            AudioPlayerManager audioPlayerManager = activity.getAudioPlayerManager();
-            if (audioPlayerManager != null) {
-                audioPlayerManager.stopAll();
-                audioPlayerManager.setCurrentEventIndex(0);
-            }
-            
-            // Also reset the PlayFragment state
             PlayFragment playFragment = activity.getCurrentPlayFragment();
             if (playFragment != null) {
-                playFragment.resetPlayState();
+                playFragment.stopShow(); // Explicitly call the stop button function
             }
             
             activity.getViewPager().setCurrentItem(0); // Switch to play tab
