@@ -80,11 +80,12 @@ public class ConfigureFragment extends Fragment {
     }
 
     private void selectFiles() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("audio/*");
         intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/mpeg", "audio/mp3", "audio/mp4", "audio/wav", "audio/ogg"});
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         
         filePickerLauncher.launch(Intent.createChooser(intent, "Select Audio Files"));
     }
@@ -95,12 +96,22 @@ public class ConfigureFragment extends Fragment {
             int count = data.getClipData().getItemCount();
             for (int i = 0; i < count; i++) {
                 Uri uri = data.getClipData().getItemAt(i).getUri();
+                // Take persistent permission for the URI
+                getActivity().getContentResolver().takePersistableUriPermission(
+                    uri, 
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
                 addFileToShow(uri);
             }
             Toast.makeText(getContext(), "Selected " + count + " files", Toast.LENGTH_SHORT).show();
         } else if (data.getData() != null) {
             // Single file selected
             Uri uri = data.getData();
+            // Take persistent permission for the URI
+            getActivity().getContentResolver().takePersistableUriPermission(
+                uri, 
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
             addFileToShow(uri);
             Toast.makeText(getContext(), "Selected 1 file", Toast.LENGTH_SHORT).show();
         }

@@ -27,11 +27,16 @@ public class AudioPlayerManager {
 
             MediaPlayer player = new MediaPlayer();
             
-            // Take persistent read permission for the URI
-            context.getContentResolver().takePersistableUriPermission(
-                Uri.parse(uri), 
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            );
+            // Check if we have persistent permission, if not try to take it
+            try {
+                context.getContentResolver().takePersistableUriPermission(
+                    Uri.parse(uri), 
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException e) {
+                Log.w("AudioPlayerManager", "No persistent permission for URI: " + uri);
+                // Continue anyway - the file might still be accessible
+            }
             
             player.setDataSource(context, Uri.parse(uri));
             player.prepare();
