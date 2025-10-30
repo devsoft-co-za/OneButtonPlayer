@@ -146,6 +146,12 @@ public class ConfigureFragment extends Fragment {
         if (fileName.contains("/")) {
             fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
         }
+        // Decode URL-encoded characters
+        try {
+            fileName = java.net.URLDecoder.decode(fileName, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            // If decoding fails, use the original filename
+        }
         return fileName;
     }
 
