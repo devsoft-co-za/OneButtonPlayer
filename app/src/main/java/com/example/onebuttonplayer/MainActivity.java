@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
     
-    private PlayFragment getCurrentPlayFragment() {
+    public PlayFragment getCurrentPlayFragment() {
         // Get the current fragment from ViewPager
         if (viewPager.getCurrentItem() == 0) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());

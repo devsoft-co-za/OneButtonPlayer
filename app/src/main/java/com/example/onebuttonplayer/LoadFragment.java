@@ -126,6 +126,13 @@ public class LoadFragment extends Fragment {
                 audioPlayerManager.stopAll();
                 audioPlayerManager.setCurrentEventIndex(0);
             }
+            
+            // Also reset the PlayFragment state
+            PlayFragment playFragment = activity.getCurrentPlayFragment();
+            if (playFragment != null) {
+                playFragment.resetPlayState();
+            }
+            
             activity.getViewPager().setCurrentItem(0); // Switch to play tab
         }
     }

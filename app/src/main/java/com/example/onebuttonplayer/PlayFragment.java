@@ -221,4 +221,10 @@ public class PlayFragment extends Fragment {
             default: return "🎵";
         }
     }
+
+    public void resetPlayState() {
+        isPlaying = false;
+        currentEventIndex = 0;
+        updatePlayScreen();
+    }
 }
