@@ -39,6 +39,13 @@ public class PlayFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update the screen whenever the fragment becomes visible
+        updatePlayScreen();
+    }
+
     private void setupPlayControls(View view) {
         Button playBtn = view.findViewById(R.id.playBtn);
         Button pauseBtn = view.findViewById(R.id.pauseBtn);
@@ -101,6 +108,12 @@ public class PlayFragment extends Fragment {
 
         Show currentShow = showManager.getCurrentShow();
         
+        // Always try to load the last show if none is currently set
+        if (currentShow == null) {
+            showManager.loadLastShow();
+            currentShow = showManager.getCurrentShow();
+        }
+        
         if (currentShow != null) {
             showName.setText(currentShow.getName());
             eventCount.setText("Events: " + currentShow.getEvents().size());
@@ -124,13 +137,16 @@ public class PlayFragment extends Fragment {
                 statusText.setText("No Shows Configured");
                 statusIcon.setText("❌");
             } else {
-                showName.setText("Select a Show");
-                statusText.setText("Tap Load to Select Show");
-                statusIcon.setText("📂");
+                // If there are shows but none is loaded, load the first one
+                Show firstShow = savedShows.get(0);
+                showManager.setCurrentShow(firstShow);
+                showName.setText(firstShow.getName());
+                eventCount.setText("Events: " + firstShow.getEvents().size());
+                playStatus.setText("Stopped");
+                statusText.setText("Ready to Play");
+                statusIcon.setText("🎵");
+                statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null));
             }
-            eventCount.setText("0");
-            playStatus.setText("Stopped");
-            statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, null));
         }
     }
 
