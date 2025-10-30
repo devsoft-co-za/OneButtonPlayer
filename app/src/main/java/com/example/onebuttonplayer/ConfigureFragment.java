@@ -235,12 +235,68 @@ private void updateEventsList() {
     }
 }
     private void saveShow() {
-        // TODO: Implement save show
-        Toast.makeText(getContext(), "Save show not implemented yet", Toast.LENGTH_SHORT).show();
+        View view = getView();
+        if (view == null) return;
+        
+        android.widget.EditText showNameInput = view.findViewById(R.id.showNameInput);
+        String showName = showNameInput.getText().toString().trim();
+        
+        if (showName.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter a show name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        Show currentShow = showManager.getCurrentShow();
+        if (currentShow == null || currentShow.getFiles().isEmpty()) {
+            Toast.makeText(getContext(), "Please select audio files first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (currentShow.getEvents().isEmpty()) {
+            Toast.makeText(getContext(), "Please add at least one event", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Set the show name and save
+        currentShow.setName(showName);
+        showManager.saveShow(currentShow);
+        
+        Toast.makeText(getContext(), "Show saved successfully!", Toast.LENGTH_SHORT).show();
+        
+        // Clear the form after saving
+        clearShow();
     }
 
     private void clearShow() {
-        // TODO: Implement clear show
-        Toast.makeText(getContext(), "Clear show not implemented yet", Toast.LENGTH_SHORT).show();
+        // Clear the current show
+        showManager.setCurrentShow(null);
+        
+        // Clear UI elements
+        View view = getView();
+        if (view != null) {
+            android.widget.EditText showNameInput = view.findViewById(R.id.showNameInput);
+            showNameInput.setText("");
+        }
+        
+        // Clear the file and event lists
+        selectedFilesContainer.removeAllViews();
+        eventsListContainer.removeAllViews();
+        
+        // Show empty state messages
+        TextView noFilesMessage = new TextView(getContext());
+        noFilesMessage.setText("No files selected");
+        noFilesMessage.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        noFilesMessage.setTextAppearance(android.R.style.TextAppearance_Medium);
+        noFilesMessage.setTextColor(getResources().getColor(android.R.color.darker_gray, null));
+        selectedFilesContainer.addView(noFilesMessage);
+        
+        TextView noEventsMessage = new TextView(getContext());
+        noEventsMessage.setText("No events added");
+        noEventsMessage.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        noEventsMessage.setTextAppearance(android.R.style.TextAppearance_Medium);
+        noEventsMessage.setTextColor(getResources().getColor(android.R.color.darker_gray, null));
+        eventsListContainer.addView(noEventsMessage);
+        
+        Toast.makeText(getContext(), "Show cleared", Toast.LENGTH_SHORT).show();
     }
 }
