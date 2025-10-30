@@ -60,10 +60,13 @@ public class PlayFragment extends Fragment {
         updatePlayScreen();
 
         // Visual feedback
-        android.widget.LinearLayout statusIndicator = getView().findViewById(R.id.statusIndicator);
-        statusIndicator.setBackgroundColor(android.graphics.Color.GREEN);
-        new android.os.Handler().postDelayed(() -> 
-            statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null)), 300);
+        View view = getView();
+        if (view != null) {
+            android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
+            statusIndicator.setBackgroundColor(android.graphics.Color.GREEN);
+            new android.os.Handler().postDelayed(() -> 
+                statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null)), 300);
+        }
     }
 
     private void pauseShow() {
@@ -80,12 +83,15 @@ public class PlayFragment extends Fragment {
     }
 
     private void updatePlayScreen() {
-        TextView showName = getView().findViewById(R.id.showName);
-        TextView eventCount = getView().findViewById(R.id.eventCount);
-        TextView playStatus = getView().findViewById(R.id.playStatus);
-        TextView statusText = getView().findViewById(R.id.statusText);
-        TextView statusIcon = getView().findViewById(R.id.statusIcon);
-        android.widget.LinearLayout statusIndicator = getView().findViewById(R.id.statusIndicator);
+        View view = getView();
+        if (view == null) return;
+        
+        TextView showName = view.findViewById(R.id.showName);
+        TextView eventCount = view.findViewById(R.id.eventCount);
+        TextView playStatus = view.findViewById(R.id.playStatus);
+        TextView statusText = view.findViewById(R.id.statusText);
+        TextView statusIcon = view.findViewById(R.id.statusIcon);
+        android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
 
         Show currentShow = showManager.getCurrentShow();
         
@@ -134,16 +140,19 @@ public class PlayFragment extends Fragment {
         audioPlayerManager.setCurrentEventIndex(currentEventIndex);
         
         // Update status
-        TextView statusText = getView().findViewById(R.id.statusText);
-        TextView statusIcon = getView().findViewById(R.id.statusIcon);
-        statusText.setText("Event " + currentEventIndex + "/" + currentShow.getEvents().size());
-        statusIcon.setText(getEventIcon(event.getType()));
-        
-        // Visual feedback
-        android.widget.LinearLayout statusIndicator = getView().findViewById(R.id.statusIndicator);
-        statusIndicator.setBackgroundColor(android.graphics.Color.YELLOW);
-        new android.os.Handler().postDelayed(() -> 
-            statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark, null)), 300);
+        View view = getView();
+        if (view != null) {
+            TextView statusText = view.findViewById(R.id.statusText);
+            TextView statusIcon = view.findViewById(R.id.statusIcon);
+            statusText.setText("Event " + currentEventIndex + "/" + currentShow.getEvents().size());
+            statusIcon.setText(getEventIcon(event.getType()));
+            
+            // Visual feedback
+            android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
+            statusIndicator.setBackgroundColor(android.graphics.Color.YELLOW);
+            new android.os.Handler().postDelayed(() -> 
+                statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark, null)), 300);
+        }
     }
 
     private void executeEvent(ShowEvent event) {

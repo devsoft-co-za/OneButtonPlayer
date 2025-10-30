@@ -55,10 +55,12 @@ public class ShowManager {
     public void loadLastShow() {
         String lastShowId = prefs.getString(KEY_LAST_SHOW, null);
         if (lastShowId != null) {
-            currentShow = shows.stream()
-                .filter(show -> show.getId().equals(lastShowId))
-                .findFirst()
-                .orElse(null);
+            for (Show show : shows) {
+                if (show.getId().equals(lastShowId)) {
+                    currentShow = show;
+                    break;
+                }
+            }
         }
     }
 
@@ -74,27 +76,31 @@ public class ShowManager {
                 );
 
                 // Load files
-                JSONArray filesArray = jsonShow.getJSONArray("files");
-                for (int j = 0; j < filesArray.length(); j++) {
-                    JSONObject jsonFile = filesArray.getJSONObject(j);
-                    ShowFile file = new ShowFile(
-                        jsonFile.getString("name"),
-                        jsonFile.getString("uri"),
-                        jsonFile.getInt("index")
-                    );
-                    show.getFiles().add(file);
+                if (jsonShow.has("files")) {
+                    JSONArray filesArray = jsonShow.getJSONArray("files");
+                    for (int j = 0; j < filesArray.length(); j++) {
+                        JSONObject jsonFile = filesArray.getJSONObject(j);
+                        ShowFile file = new ShowFile(
+                            jsonFile.getString("name"),
+                            jsonFile.getString("uri"),
+                            jsonFile.getInt("index")
+                        );
+                        show.getFiles().add(file);
+                    }
                 }
 
                 // Load events
-                JSONArray eventsArray = jsonShow.getJSONArray("events");
-                for (int j = 0; j < eventsArray.length(); j++) {
-                    JSONObject jsonEvent = eventsArray.getJSONObject(j);
-                    ShowEvent event = new ShowEvent(
-                        jsonEvent.getString("type"),
-                        jsonEvent.getInt("trackIndex"),
-                        jsonEvent.getString("trackName")
-                    );
-                    show.getEvents().add(event);
+                if (jsonShow.has("events")) {
+                    JSONArray eventsArray = jsonShow.getJSONArray("events");
+                    for (int j = 0; j < eventsArray.length(); j++) {
+                        JSONObject jsonEvent = eventsArray.getJSONObject(j);
+                        ShowEvent event = new ShowEvent(
+                            jsonEvent.getString("type"),
+                            jsonEvent.getInt("trackIndex"),
+                            jsonEvent.getString("trackName")
+                        );
+                        show.getEvents().add(event);
+                    }
                 }
 
                 shows.add(show);

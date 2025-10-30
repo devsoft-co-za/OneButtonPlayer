@@ -35,6 +35,14 @@ public class LoadFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            adapter.setShows(showManager.getShows());
+        }
+    }
+
     private class ShowAdapter extends RecyclerView.Adapter<ShowAdapter.ShowViewHolder> {
 
         private List<Show> shows;
@@ -58,6 +66,11 @@ public class LoadFragment extends Fragment {
         @Override
         public int getItemCount() {
             return shows.size();
+        }
+
+        public void setShows(List<Show> shows) {
+            this.shows = shows;
+            notifyDataSetChanged();
         }
 
         class ShowViewHolder extends RecyclerView.ViewHolder {

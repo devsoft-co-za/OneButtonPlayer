@@ -54,7 +54,11 @@ public class AudioPlayerManager {
     public void stopTrack(int trackIndex) {
         MediaPlayer player = players.get(trackIndex);
         if (player != null) {
-            player.stop();
+            try {
+                player.stop();
+            } catch (IllegalStateException e) {
+                Log.w("AudioPlayerManager", "Player already stopped: " + e.getMessage());
+            }
             player.release();
             players.remove(trackIndex);
         }
@@ -62,7 +66,7 @@ public class AudioPlayerManager {
 
     public void pauseAll() {
         for (MediaPlayer player : players.values()) {
-            if (player.isPlaying()) {
+            if (player != null && player.isPlaying()) {
                 player.pause();
             }
         }
@@ -71,7 +75,11 @@ public class AudioPlayerManager {
 
     public void stopAll() {
         for (MediaPlayer player : players.values()) {
-            player.stop();
+            try {
+                player.stop();
+            } catch (IllegalStateException e) {
+                Log.w("AudioPlayerManager", "Player already stopped: " + e.getMessage());
+            }
             player.release();
         }
         players.clear();
