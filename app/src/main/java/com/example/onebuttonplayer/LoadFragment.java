@@ -118,9 +118,14 @@ public class LoadFragment extends Fragment {
         showManager.setCurrentShow(show);
         Toast.makeText(getContext(), "Loaded show: " + show.getName(), Toast.LENGTH_SHORT).show();
 
-        // Switch to play screen
+        // Reset play state
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
+            AudioPlayerManager audioPlayerManager = activity.getAudioPlayerManager();
+            if (audioPlayerManager != null) {
+                audioPlayerManager.stopAll();
+                audioPlayerManager.setCurrentEventIndex(0);
+            }
             activity.getViewPager().setCurrentItem(0); // Switch to play tab
         }
     }
