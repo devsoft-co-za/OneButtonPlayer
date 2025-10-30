@@ -94,6 +94,16 @@ public class LoadFragment extends Fragment {
                         loadShow(show);
                     }
                 });
+
+                itemView.setOnLongClickListener(v -> {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Show show = shows.get(position);
+                        showDeleteConfirmation(show, position);
+                        return true;
+                    }
+                    return false;
+                });
             }
 
             public void bind(Show show) {
@@ -113,5 +123,18 @@ public class LoadFragment extends Fragment {
         if (activity != null) {
             activity.getViewPager().setCurrentItem(0); // Switch to play tab
         }
+    }
+
+    private void showDeleteConfirmation(Show show, int position) {
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Delete Show")
+            .setMessage("Are you sure you want to delete \"" + show.getName() + "\"?")
+            .setPositiveButton("Delete", (dialog, which) -> {
+                showManager.deleteShow(show.getId());
+                adapter.setShows(showManager.getShows());
+                Toast.makeText(getContext(), "Show deleted", Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 }
