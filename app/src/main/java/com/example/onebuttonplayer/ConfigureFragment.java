@@ -6,17 +6,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 // Import custom classes
 import com.example.onebuttonplayer.ShowManager;
 import com.example.onebuttonplayer.ShowFile;
+import com.example.onebuttonplayer.ShowEvent;
+import com.example.onebuttonplayer.Show;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigureFragment extends Fragment {
     private ShowManager showManager;
@@ -147,10 +155,85 @@ public class ConfigureFragment extends Fragment {
     }
 
     private void showEventDialog() {
-        // TODO: Implement event dialog
-        Toast.makeText(getContext(), "Event dialog not implemented yet", Toast.LENGTH_SHORT).show();
+        Show currentShow = showManager.getCurrentShow();
+        if (currentShow == null || currentShow.getFiles().isEmpty()) {
+            Toast.makeText(getContext(), "Please select audio files first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Create dialog view
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_event, null);
+        
+        // Setup event type spinner
+        Spinner eventTypeSpinner = dialogView.findViewById(R.id.eventTypeSpinner);
+        String[] eventTypes = {"start", "stop", "pause", "resume"};
+        ArrayAdapter<String> eventTypeAdapter = new ArrayAdapter<>(getContext(), 
+            android.R.layout.simple_spinner_item, eventTypes);
+        eventTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        eventTypeSpinner.setAdapter(eventTypeAdapter);
+
+        // Setup track spinner
+        Spinner trackSpinner = dialogView.findViewById(R.id.trackSpinner);
+        List<String> trackNames = new ArrayList<>();
+        for (ShowFile file : currentShow.getFiles()) {
+            trackNames.add(file.getName());
+        }
+        ArrayAdapter<String> trackAdapter = new ArrayAdapter<>(getContext(),
+            android.R.layout.simple_spinner_item, trackNames);
+        trackAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        trackSpinner.setAdapter(trackAdapter);
+
+        // Create and show dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(dialogView)
+            .setTitle("Add Event")
+            .setPositiveButton("Add", (dialog, which) -> {
+                String eventType = eventTypeSpinner.getSelectedItem().toString();
+                int trackIndex = trackSpinner.getSelectedItemPosition();
+                String trackName = trackNames.get(trackIndex);
+                
+                addEventToShow(eventType, trackIndex, trackName);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
+    private void addEventToShow(String eventType, int trackIndex, String trackName) {
+        Show currentShow = showManager.getCurrentShow();
+        if (currentShow == null) {
+            currentShow = new Show(String.valueOf(System.currentTimeMillis()), "New Show");
+            showManager.setCurrentShow(currentShow);
+        }
+        
+        ShowEvent event = new ShowEvent(eventType, trackIndex, trackName);
+        currentShow.getEvents().add(event);
+        updateEventsList();
+        Toast.makeText(getContext(), "Event added: " + eventType + " - " + trackName, Toast.LENGTH_SHORT).show();
+    }
+
+private void updateEventsList() {
+    eventsListContainer.removeAllViews();
+
+    Show currentShow = showManager.getCurrentShow();
+    if (currentShow == null || currentShow.getEvents().isEmpty()) {
+        TextView noEventsMessage = new TextView(getContext());
+        noEventsMessage.setText("No events added");
+        noEventsMessage.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        noEventsMessage.setTextAppearance(android.R.style.TextAppearance_Medium);
+        noEventsMessage.setTextColor(getResources().getColor(android.R.color.darker_gray, null));
+        eventsListContainer.addView(noEventsMessage);
+        return;
+    }
+
+    for (ShowEvent event : currentShow.getEvents()) {
+        TextView eventView = new TextView(getContext());
+        eventView.setText(event.getType().toUpperCase() + " - " + event.getTrackName());
+        eventView.setPadding(8, 8, 8, 8);
+        eventView.setBackgroundColor(getResources().getColor(android.R.color.white, null));
+        eventView.setTextAppearance(android.R.style.TextAppearance_Small);
+        eventsListContainer.addView(eventView);
+    }
+}
     private void saveShow() {
         // TODO: Implement save show
         Toast.makeText(getContext(), "Save show not implemented yet", Toast.LENGTH_SHORT).show();
