@@ -1,6 +1,7 @@
 package com.example.onebuttonplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
@@ -25,6 +26,13 @@ public class AudioPlayerManager {
             stopAll();
 
             MediaPlayer player = new MediaPlayer();
+            
+            // Take persistent read permission for the URI
+            context.getContentResolver().takePersistableUriPermission(
+                Uri.parse(uri), 
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
+            
             player.setDataSource(context, Uri.parse(uri));
             player.prepare();
             player.start();
