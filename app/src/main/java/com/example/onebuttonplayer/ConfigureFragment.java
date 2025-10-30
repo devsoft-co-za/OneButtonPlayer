@@ -54,12 +54,8 @@ public class ConfigureFragment extends Fragment {
             }
         );
 
-        // Clear current show and setup UI
-        showManager.setCurrentShow(null);
+        // Setup UI components
         setupUI(view);
-        
-        // Clear the file and event lists on startup
-        clearShow();
 
         return view;
     }
@@ -121,6 +117,8 @@ public class ConfigureFragment extends Fragment {
         if (currentShow == null) {
             // Create a new show if none exists
             currentShow = new Show(String.valueOf(System.currentTimeMillis()), "New Show");
+            currentShow.setFiles(new ArrayList<>());
+            currentShow.setEvents(new ArrayList<>());
             showManager.setCurrentShow(currentShow);
         }
         
@@ -225,6 +223,8 @@ public class ConfigureFragment extends Fragment {
         Show currentShow = showManager.getCurrentShow();
         if (currentShow == null) {
             currentShow = new Show(String.valueOf(System.currentTimeMillis()), "New Show");
+            currentShow.setFiles(new ArrayList<>());
+            currentShow.setEvents(new ArrayList<>());
             showManager.setCurrentShow(currentShow);
         }
         
@@ -270,12 +270,12 @@ private void updateEventsList() {
         }
         
         Show currentShow = showManager.getCurrentShow();
-        if (currentShow == null || currentShow.getFiles().isEmpty()) {
+        if (currentShow == null || currentShow.getFiles() == null || currentShow.getFiles().isEmpty()) {
             Toast.makeText(getContext(), "Please select audio files first", Toast.LENGTH_SHORT).show();
             return;
         }
         
-        if (currentShow.getEvents().isEmpty()) {
+        if (currentShow.getEvents() == null || currentShow.getEvents().isEmpty()) {
             Toast.makeText(getContext(), "Please add at least one event", Toast.LENGTH_SHORT).show();
             return;
         }
