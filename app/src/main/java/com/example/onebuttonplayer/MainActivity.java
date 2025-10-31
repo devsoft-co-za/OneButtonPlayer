@@ -144,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
         // Get the current fragment from ViewPager
         if (viewPager.getCurrentItem() == 0) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
-            if (fragment instanceof PlayFragment) {
                 return (PlayFragment) fragment;
             }
         }
@@ -157,8 +156,8 @@ public class MainActivity extends AppCompatActivity {
         }
         
         return null;
+    }
     
-    @Override
     @Override
     protected void onPause() {
         super.onPause();
@@ -172,9 +171,7 @@ public class MainActivity extends AppCompatActivity {
         audioPlayerManager.cleanup();
         
         // Unbind from PlayerService
-            isServiceBound = false;
-        }
-    }
+        if (isServiceBound) {
 }
 
 // Pager Adapter
