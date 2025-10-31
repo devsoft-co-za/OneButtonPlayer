@@ -79,6 +79,12 @@ public class PlayFragment extends Fragment {
         audioPlayerManager.setCurrentEventIndex(0);
         updatePlayScreen();
 
+        // Start foreground service for background playback
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.playerService != null) {
+            activity.playerService.startForegroundService();
+        }
+
         // Visual feedback
         View view = getView();
         if (view != null) {
@@ -101,6 +107,13 @@ public class PlayFragment extends Fragment {
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
         android.util.Log.i("PlayFragment", "stopShow() - isPlaying=" + isPlaying + ", currentEventIndex=" + currentEventIndex);
+        
+        // Stop foreground service when playback stops
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.playerService != null) {
+            activity.playerService.stopForegroundService();
+        }
+        
         updatePlayScreen();
     }
 
