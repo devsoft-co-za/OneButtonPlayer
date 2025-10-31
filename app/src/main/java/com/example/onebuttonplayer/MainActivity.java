@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
             unbindService(serviceConnection);
             isServiceBound = false;
         }
+    }
 }
 
 // Pager Adapter
