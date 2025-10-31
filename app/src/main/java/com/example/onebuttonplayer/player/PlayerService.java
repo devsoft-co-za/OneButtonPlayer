@@ -137,9 +137,10 @@ public class PlayerService extends Service {
         notificationManager = null;
         audioPlayerManager = null;
 
-        if (mediaSessionCompat != null) {
-            mediaSessionCompat.release();
-        }
+        // MediaSessionCompat temporarily disabled
+        // if (mediaSessionCompat != null) {
+        //     mediaSessionCompat.release();
+        // }
 
         super.onDestroy();
     }
