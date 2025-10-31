@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
 import com.example.onebuttonplayer.MainActivity;
+import com.example.onebuttonplayer.PlayFragment;
 import com.example.onebuttonplayer.ShowManager;
 
 public class PlayerService extends Service {
