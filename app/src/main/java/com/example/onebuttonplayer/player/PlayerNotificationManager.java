@@ -92,13 +92,8 @@ public class PlayerNotificationManager {
         stopIntent.setAction("STOP");
         PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 2, stopIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        // Build notification
-        Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new Notification.Builder(context, CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(context);
-        }
+        // Build notification using NotificationCompat for better compatibility
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
 
         builder.setContentTitle("One Button Player")
                 .setContentText("Playing audio")
@@ -107,9 +102,9 @@ public class PlayerNotificationManager {
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .setShowWhen(false)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setPriority(Notification.PRIORITY_DEFAULT)
-                .setCategory(Notification.CATEGORY_SERVICE);
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE);
 
         // Add actions - single button to trigger events
         builder.addAction(R.drawable.ic_play_arrow, "Trigger Event", triggerEventPendingIntent);
