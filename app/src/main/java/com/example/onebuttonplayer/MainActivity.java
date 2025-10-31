@@ -137,13 +137,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         
-        return super.onKeyDown(keyCode, event);
-    }
-    
-    public PlayFragment getCurrentPlayFragment() {
         // Get the current fragment from ViewPager
         if (viewPager.getCurrentItem() == 0) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+            if (fragment instanceof PlayFragment) {
                 return (PlayFragment) fragment;
             }
         }
@@ -172,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
         
         // Unbind from PlayerService
         if (isServiceBound) {
+            unbindService(serviceConnection);
+            isServiceBound = false;
+        }
 }
 
 // Pager Adapter
