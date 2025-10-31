@@ -8,7 +8,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import androidx.media.session.MediaButtonReceiver;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
@@ -20,9 +21,33 @@ public class PlayerService extends Service {
     private final IBinder iBinder = new LocalBinder();
     private AudioPlayerManager audioPlayerManager;
     private PlayerNotificationManager notificationManager;
-    // Media session temporarily disabled to fix compilation errors
-    private Object mediaSessionCompat;
-    private final Object mediaSessionCallback = null;
+    private MediaSessionCompat mediaSessionCompat;
+    private final MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
+        @Override
+        public void onPlay() {
+            // Handle play from media controls
+            if (audioPlayerManager != null && !audioPlayerManager.isPlaying()) {
+                // Resume playback
+                // This would need to be coordinated with the UI
+            }
+        }
+
+        @Override
+        public void onPause() {
+            // Handle pause from media controls
+            if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
+                audioPlayerManager.pauseAll();
+            }
+        }
+
+        @Override
+        public void onStop() {
+            // Handle stop from media controls
+            if (audioPlayerManager != null) {
+                audioPlayerManager.stopAll();
+            }
+        }
+    };
     private PowerManager.WakeLock wakeLock;
 
     public PlayerService() {
@@ -55,14 +80,19 @@ public class PlayerService extends Service {
 
     private void configureMediaSession() {
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        ComponentName mediaButtonReceiverComponentName = new ComponentName(this, MediaButtonReceiver.class);
+        ComponentName mediaButtonReceiverComponentName = new ComponentName(this, NotificationReceiver.class);
         PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        // TODO: Re-enable MediaSessionCompat when properly configured with androidx
-        // mediaSessionCompat = new MediaSessionCompat(this, "OneButtonPlayerMediaSession", mediaButtonReceiverComponentName, mediaButtonReceiverPendingIntent);
-        // mediaSessionCompat.setActive(true);
-        // mediaSessionCompat.setCallback(mediaSessionCallback);
-        // mediaSessionCompat.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
+        mediaSessionCompat = new MediaSessionCompat(this, "OneButtonPlayerMediaSession", mediaButtonReceiverComponentName, mediaButtonReceiverPendingIntent);
+        mediaSessionCompat.setActive(true);
+        mediaSessionCompat.setCallback(mediaSessionCallback);
+        mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        
+        // Set initial playback state
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE | 
+                           PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_STOP);
+        mediaSessionCompat.setPlaybackState(stateBuilder.build());
     }
 
     private boolean handleMediaButtonEvent(Intent mediaButtonEvent) {
@@ -144,10 +174,9 @@ public class PlayerService extends Service {
         notificationManager = null;
         audioPlayerManager = null;
 
-        // MediaSessionCompat temporarily disabled
-        // if (mediaSessionCompat != null) {
-        //     mediaSessionCompat.release();
-        // }
+        if (mediaSessionCompat != null) {
+            mediaSessionCompat.release();
+        }
 
         super.onDestroy();
     }

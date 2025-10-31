@@ -22,8 +22,8 @@ android {
     }
     
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
@@ -37,5 +37,5 @@ dependencies {
     
     // Media session support for background playback and media controls
     implementation 'androidx.media:media:1.7.0'
-    implementation 'androidx.media2:media2-session:1.2.1'
+    // implementation 'androidx.media2:media2-session:1.2.1'  // Temporarily disabled to fix compilation
 }
