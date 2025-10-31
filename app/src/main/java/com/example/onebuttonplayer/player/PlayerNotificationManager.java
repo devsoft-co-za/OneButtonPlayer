@@ -11,8 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.media.session.MediaSessionCompat;
-import androidx.media.app.NotificationCompat;
-import androidx.media.app.NotificationCompat.MediaStyle;
+import androidx.core.app.NotificationCompat;
+
 
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.R;
@@ -116,7 +116,7 @@ public class PlayerNotificationManager {
 
         // Add media session token for lock screen controls
         if (mediaSession != null) {
-            MediaStyle mediaStyle = new MediaStyle();
+            NotificationCompat.MediaStyle mediaStyle = new NotificationCompat.MediaStyle();
             mediaStyle.setMediaSession(mediaSession.getSessionToken());
             mediaStyle.setShowActionsInCompactView(0); // Show first action in compact view
             builder.setStyle(mediaStyle);
