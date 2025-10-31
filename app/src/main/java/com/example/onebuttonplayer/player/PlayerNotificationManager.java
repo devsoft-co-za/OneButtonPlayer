@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.media.session.MediaSessionCompat;
+import androidx.media.app.NotificationCompat;
 
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.R;
@@ -22,12 +23,17 @@ public class PlayerNotificationManager {
     private final Context context;
     private final NotificationManager notificationManager;
     private final PlayerService playerService;
+    private MediaSessionCompat mediaSession;
 
     public PlayerNotificationManager(PlayerService playerService) {
         this.playerService = playerService;
         this.context = playerService;
         this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
+    }
+
+    public void setMediaSession(MediaSessionCompat mediaSession) {
+        this.mediaSession = mediaSession;
     }
 
     private void createNotificationChannel() {
@@ -37,7 +43,7 @@ public class PlayerNotificationManager {
                 NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "One Button Player",
-                    NotificationManager.IMPORTANCE_LOW
+                    NotificationManager.IMPORTANCE_DEFAULT
                 );
                 channel.setDescription("Media playback controls");
                 channel.setShowBadge(false);
@@ -100,7 +106,7 @@ public class PlayerNotificationManager {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setPriority(Notification.PRIORITY_LOW)
+                .setPriority(Notification.PRIORITY_DEFAULT)
                 .setCategory(Notification.CATEGORY_SERVICE);
 
         // Add actions - single button to trigger events
@@ -108,10 +114,10 @@ public class PlayerNotificationManager {
         builder.addAction(R.drawable.ic_stop, "Stop", stopPendingIntent);
 
         // Add media session token for lock screen controls
-        MediaSessionCompat mediaSession = playerService.getMediaSession();
         if (mediaSession != null) {
-            // Media session integration will be added later
-            // For now, basic notification without media style
+            builder.setStyle(new NotificationCompat.MediaStyle()
+                    .setMediaSession(mediaSession.getSessionToken())
+                    .setShowActionsInCompactView(0)); // Show first action in compact view
         }
 
         return builder.build();

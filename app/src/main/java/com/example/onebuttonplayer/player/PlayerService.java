@@ -85,7 +85,25 @@ public class PlayerService extends Service {
             // Set session active to receive media button events
             mediaSession.setActive(true);
             
-            android.util.Log.i("PlayerService", "MediaSession configured and active");
+            // Set media session flags to receive media button events
+            mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | 
+                                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            
+            // Set playback state to indicate we can handle media buttons
+            PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(PlaybackStateCompat.ACTION_PLAY | 
+                               PlaybackStateCompat.ACTION_PAUSE | 
+                               PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                               PlaybackStateCompat.ACTION_STOP);
+            
+            mediaSession.setPlaybackState(stateBuilder.build());
+            
+            // Set session token for notification manager
+            if (notificationManager != null) {
+                notificationManager.setMediaSession(mediaSession);
+            }
+            
+            android.util.Log.i("PlayerService", "MediaSession configured and active with media button handling");
         } catch (Exception e) {
             android.util.Log.e("PlayerService", "Error configuring MediaSession", e);
         }
@@ -106,31 +124,42 @@ public class PlayerService extends Service {
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 case KeyEvent.KEYCODE_HEADSETHOOK:
                     // Toggle play/pause
-                    if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
-                        audioPlayerManager.pauseAll();
+                    android.util.Log.i("PlayerService", "Media button: Play/Pause");
+                    if (audioPlayerManager != null) {
+                        if (audioPlayerManager.isPlaying()) {
+                            audioPlayerManager.pauseAll();
+                        } else {
+                            // If not playing, trigger next event or start show
+                            triggerNextEvent();
+                        }
                     }
                     isSuccess = true;
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_CLOSE:
                 case KeyEvent.KEYCODE_MEDIA_STOP:
+                    android.util.Log.i("PlayerService", "Media button: Stop");
                     if (audioPlayerManager != null) {
-                        audioPlayerManager.pauseAll();
+                        audioPlayerManager.stopAll();
                     }
                     isSuccess = true;
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                    android.util.Log.i("PlayerService", "Media button: Previous");
                     // Previous event - handled by PlayFragment
                     isSuccess = true;
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
-                    // Next event - handled by PlayFragment
+                    android.util.Log.i("PlayerService", "Media button: Next");
+                    // Next event - trigger next event
+                    triggerNextEvent();
                     isSuccess = true;
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
+                    android.util.Log.i("PlayerService", "Media button: Rewind");
                     // Not applicable
                     isSuccess = true;
                     break;
