@@ -16,6 +16,9 @@ import android.view.KeyEvent;
 import com.example.onebuttonplayer.AudioPlayerManager;
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.PlayFragment;
+import com.example.onebuttonplayer.Show;
+import com.example.onebuttonplayer.ShowEvent;
+import com.example.onebuttonplayer.ShowFile;
 import com.example.onebuttonplayer.ShowManager;
 
 public class PlayerService extends Service {
@@ -123,16 +126,9 @@ public class PlayerService extends Service {
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 case KeyEvent.KEYCODE_HEADSETHOOK:
-                    // Toggle play/pause
-                    android.util.Log.i("PlayerService", "Media button: Play/Pause");
-                    if (audioPlayerManager != null) {
-                        if (audioPlayerManager.isPlaying()) {
-                            audioPlayerManager.pauseAll();
-                        } else {
-                            // If not playing, trigger next event or start show
-                            triggerNextEvent();
-                        }
-                    }
+                    // Toggle play/pause or trigger next event
+                    android.util.Log.i("PlayerService", "Media button: Play/Pause/Next Event");
+                    triggerNextEvent();
                     isSuccess = true;
                     break;
 
@@ -142,12 +138,13 @@ public class PlayerService extends Service {
                     if (audioPlayerManager != null) {
                         audioPlayerManager.stopAll();
                     }
+                    stopForegroundService();
                     isSuccess = true;
                     break;
 
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                     android.util.Log.i("PlayerService", "Media button: Previous");
-                    // Previous event - handled by PlayFragment
+                    // Previous event - not implemented for now
                     isSuccess = true;
                     break;
 
@@ -170,28 +167,74 @@ public class PlayerService extends Service {
     }
 
     private void triggerNextEvent() {
-        // Forward the event trigger to the PlayFragment if the app is in foreground
+        android.util.Log.i("PlayerService", "triggerNextEvent() called");
+        
+        // First try to forward to PlayFragment if app is in foreground
         MainActivity activity = getMainActivity();
         if (activity != null) {
+            android.util.Log.i("PlayerService", "App is in foreground, forwarding to PlayFragment");
             PlayFragment playFragment = activity.getCurrentPlayFragment();
             if (playFragment != null) {
                 playFragment.handleButtonPress();
+                return;
+            }
+        }
+        
+        // If app is in background, trigger the event directly
+        android.util.Log.i("PlayerService", "App is in background, triggering event directly");
+        if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
+            // Get current show from ShowManager
+            ShowManager showManager = new ShowManager(this);
+            Show currentShow = showManager.getCurrentShow();
+            
+            if (currentShow != null && !currentShow.getEvents().isEmpty()) {
+                int currentEventIndex = audioPlayerManager.getCurrentEventIndex();
+                android.util.Log.i("PlayerService", "Current event index: " + currentEventIndex);
+                
+                if (currentEventIndex < currentShow.getEvents().size()) {
+                    ShowEvent event = currentShow.getEvents().get(currentEventIndex);
+                    android.util.Log.i("PlayerService", "Executing event: " + event.getType() + " - " + event.getTrackName());
+                    executeEvent(event);
+                    audioPlayerManager.setCurrentEventIndex(currentEventIndex + 1);
+                } else {
+                    // Show completed
+                    android.util.Log.i("PlayerService", "Show completed, stopping playback");
+                    audioPlayerManager.stopAll();
+                    stopForegroundService();
+                }
+            } else {
+                android.util.Log.w("PlayerService", "No current show or events available");
             }
         } else {
-            // If app is in background, trigger the event directly using the service's audio player
-            if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
-                // Simulate button press by triggering the next event
-                android.util.Log.i("PlayerService", "TRIGGER_EVENT: Simulating button press in background");
-                // For now, we'll just pause/play as a simple action
-                audioPlayerManager.pauseAll();
-                new android.os.Handler().postDelayed(() -> {
-                    if (audioPlayerManager != null) {
-                        // Resume playback after brief pause
-                        // In a full implementation, this would advance to the next event
-                        audioPlayerManager.resumeTrack(0); // Simplified - assumes track 0
-                    }
-                }, 500);
-            }
+            android.util.Log.w("PlayerService", "AudioPlayerManager not available or not playing");
+        }
+    }
+
+    private void executeEvent(ShowEvent event) {
+        int trackIndex = event.getTrackIndex();
+        ShowManager showManager = new ShowManager(this);
+        Show currentShow = showManager.getCurrentShow();
+        
+        if (currentShow == null || currentShow.getFiles().size() <= trackIndex) {
+            android.util.Log.e("PlayerService", "Track index out of bounds: " + trackIndex);
+            return;
+        }
+
+        ShowFile track = currentShow.getFiles().get(trackIndex);
+        
+        switch (event.getType()) {
+            case "start":
+                audioPlayerManager.playTrack(trackIndex, track.getUri());
+                break;
+            case "stop":
+                audioPlayerManager.stopTrack(trackIndex);
+                break;
+            case "pause":
+                audioPlayerManager.pauseTrack(trackIndex);
+                break;
+            case "resume":
+                audioPlayerManager.resumeTrack(trackIndex);
+                break;
         }
     }
 
