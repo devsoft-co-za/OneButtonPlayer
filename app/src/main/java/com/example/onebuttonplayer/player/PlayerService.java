@@ -8,8 +8,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
+import androidx.media.session.MediaSessionCompat;
+import androidx.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
@@ -181,7 +181,7 @@ public class PlayerService extends Service {
         super.onDestroy();
     }
 
-    public Object getMediaSessionCompat() {
+    public MediaSessionCompat getMediaSessionCompat() {
         return mediaSessionCompat;
     }
 

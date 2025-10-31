@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.support.v4.media.session.MediaSessionCompat;
+import androidx.media.session.MediaSessionCompat;
 
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.R;
@@ -98,7 +98,7 @@ public class PlayerNotificationManager {
         // Add media session token for lock screen controls
         MediaSessionCompat mediaSession = playerService.getMediaSessionCompat();
         if (mediaSession != null) {
-            builder.setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+            builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSession.getSessionToken())
                     .setShowActionsInCompactView(0, 1));
         }
