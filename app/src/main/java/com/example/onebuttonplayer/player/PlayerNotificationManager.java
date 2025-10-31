@@ -107,14 +107,14 @@ public class PlayerNotificationManager {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE);
 
         // Add actions - single button to trigger events
-        builder.addAction(R.drawable.ic_play_arrow, "Trigger Event", triggerEventPendingIntent);
+        builder.addAction(R.drawable.ic_play_arrow, "Next Event", triggerEventPendingIntent);
         builder.addAction(R.drawable.ic_stop, "Stop", stopPendingIntent);
 
         // Add media session token for lock screen controls
         if (mediaSession != null) {
             MediaStyle mediaStyle = new MediaStyle();
             mediaStyle.setMediaSession(mediaSession.getSessionToken());
-            mediaStyle.setShowActionsInCompactView(0); // Show first action in compact view
+            mediaStyle.setShowActionsInCompactView(0, 1); // Show first two actions in compact view
             builder.setStyle(mediaStyle);
         }
 

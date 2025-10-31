@@ -97,9 +97,47 @@ public class PlayerService extends Service {
                     .setActions(PlaybackStateCompat.ACTION_PLAY | 
                                PlaybackStateCompat.ACTION_PAUSE | 
                                PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                               PlaybackStateCompat.ACTION_STOP);
+                               PlaybackStateCompat.ACTION_STOP |
+                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
             
             mediaSession.setPlaybackState(stateBuilder.build());
+            
+            // Set media button event receiver
+            mediaSession.setCallback(new MediaSessionCompat.Callback() {
+                @Override
+                public void onPlay() {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onPlay");
+                    triggerNextEvent();
+                }
+
+                @Override
+                public void onPause() {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onPause");
+                    triggerNextEvent();
+                }
+
+                @Override
+                public void onStop() {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onStop");
+                    if (audioPlayerManager != null) {
+                        audioPlayerManager.stopAll();
+                    }
+                    stopForegroundService();
+                }
+
+                @Override
+                public void onSkipToNext() {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onSkipToNext");
+                    triggerNextEvent();
+                }
+
+                @Override
+                public void onSkipToPrevious() {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onSkipToPrevious");
+                    // Previous event - not implemented for now
+                }
+            });
             
             // Set session token for notification manager
             if (notificationManager != null) {
