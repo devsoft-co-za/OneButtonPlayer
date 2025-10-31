@@ -8,8 +8,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-// MediaButtonReceiver temporarily disabled
-// import androidx.media.session.MediaButtonReceiver;
+import androidx.media.session.MediaButtonReceiver;
 import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
@@ -55,8 +54,15 @@ public class PlayerService extends Service {
     }
 
     private void configureMediaSession() {
-        // Media session configuration temporarily disabled
-        // TODO: Re-enable when androidx MediaSessionCompat is properly configured
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        ComponentName mediaButtonReceiverComponentName = new ComponentName(this, MediaButtonReceiver.class);
+        PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // TODO: Re-enable MediaSessionCompat when properly configured with androidx
+        // mediaSessionCompat = new MediaSessionCompat(this, "OneButtonPlayerMediaSession", mediaButtonReceiverComponentName, mediaButtonReceiverPendingIntent);
+        // mediaSessionCompat.setActive(true);
+        // mediaSessionCompat.setCallback(mediaSessionCallback);
+        // mediaSessionCompat.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
     }
 
     private boolean handleMediaButtonEvent(Intent mediaButtonEvent) {

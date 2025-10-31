@@ -34,4 +34,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'org.json:json:20231013'
+    
+    // Media session support for background playback and media controls
+    implementation 'androidx.media:media:1.7.0'
+    implementation 'androidx.media2:media2-session:1.2.1'
 }
