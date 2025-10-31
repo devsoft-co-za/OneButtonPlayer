@@ -232,6 +232,10 @@ public class PlayerService extends Service {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
             wakeLock.setReferenceCounted(false);
         }
+        
+        // Configure media session for media button handling
+        configureMediaSession();
+    }
 
     @Override
     public void onDestroy() {
