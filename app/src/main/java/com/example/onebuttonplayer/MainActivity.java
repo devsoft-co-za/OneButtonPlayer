@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ShowManager showManager;
     private AudioPlayerManager audioPlayerManager;
-    private PlayerService playerService;
+    public PlayerService playerService;
     private boolean isServiceBound = false;
     
     // Service connection
@@ -137,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         
+        return super.onKeyDown(keyCode, event);
+    }
+    
+    public PlayFragment getCurrentPlayFragment() {
         // Get the current fragment from ViewPager
         if (viewPager.getCurrentItem() == 0) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
