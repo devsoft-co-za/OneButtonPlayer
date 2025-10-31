@@ -8,9 +8,9 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import androidx.media2.session.MediaSession;
-import androidx.media2.session.MediaController;
-import androidx.media2.common.SessionPlayer;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
@@ -23,7 +23,7 @@ public class PlayerService extends Service {
     private final IBinder iBinder = new LocalBinder();
     private AudioPlayerManager audioPlayerManager;
     private PlayerNotificationManager notificationManager;
-    private MediaSession mediaSession;
+    private MediaSessionCompat mediaSession;
     private PowerManager.WakeLock wakeLock;
 
     public PlayerService() {
@@ -80,36 +80,8 @@ public class PlayerService extends Service {
     private void configureMediaSession() {
         try {
             // Create media session for media button handling
-            mediaSession = new MediaSession.Builder(this)
-                .setSessionCallback(new MediaSession.SessionCallback() {
-                    @Override
-                    public void onPlay(MediaSession session, SessionPlayer player) {
-                        // Handle play command from media buttons
-                        if (audioPlayerManager != null && !audioPlayerManager.isPlaying()) {
-                            // Resume playback or trigger next event
-                            triggerNextEvent();
-                        }
-                    }
-
-                    @Override
-                    public void onPause(MediaSession session, SessionPlayer player) {
-                        // Handle pause command from media buttons
-                        if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
-                            audioPlayerManager.pauseAll();
-                        }
-                    }
-
-                    @Override
-                    public void onStop(MediaSession session, SessionPlayer player) {
-                        // Handle stop command from media buttons
-                        if (audioPlayerManager != null) {
-                            audioPlayerManager.stopAll();
-                            stopForegroundService();
-                        }
-                    }
-                })
-                .build();
-
+            mediaSession = new MediaSessionCompat(this, "OneButtonPlayer");
+            
             // Set session active to receive media button events
             mediaSession.setActive(true);
             
@@ -252,7 +224,7 @@ public class PlayerService extends Service {
         super.onDestroy();
     }
 
-    public MediaSession getMediaSession() {
+    public MediaSessionCompat getMediaSession() {
         return mediaSession;
     }
 

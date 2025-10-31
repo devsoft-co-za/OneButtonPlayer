@@ -10,7 +10,7 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import androidx.media2.session.MediaSession;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.R;
@@ -108,7 +108,7 @@ public class PlayerNotificationManager {
         builder.addAction(R.drawable.ic_stop, "Stop", stopPendingIntent);
 
         // Add media session token for lock screen controls
-        MediaSession mediaSession = playerService.getMediaSession();
+        MediaSessionCompat mediaSession = playerService.getMediaSession();
         if (mediaSession != null) {
             // Media session integration will be added later
             // For now, basic notification without media style
