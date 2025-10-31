@@ -68,10 +68,10 @@ public class PlayerNotificationManager {
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        // Create play/pause action
-        Intent playPauseIntent = new Intent(context, PlayerService.NotificationReceiver.class);
-        playPauseIntent.setAction("PLAY_PAUSE");
-        PendingIntent playPausePendingIntent = PendingIntent.getBroadcast(context, 1, playPauseIntent, PendingIntent.FLAG_IMMUTABLE);
+        // Create event trigger action (like the top button on PLAY screen)
+        Intent triggerEventIntent = new Intent(context, PlayerService.NotificationReceiver.class);
+        triggerEventIntent.setAction("TRIGGER_EVENT");
+        PendingIntent triggerEventPendingIntent = PendingIntent.getBroadcast(context, 1, triggerEventIntent, PendingIntent.FLAG_IMMUTABLE);
 
         // Create stop action
         Intent stopIntent = new Intent(context, PlayerService.NotificationReceiver.class);
@@ -96,8 +96,8 @@ public class PlayerNotificationManager {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setPriority(Notification.PRIORITY_LOW);
 
-        // Add actions
-        builder.addAction(R.drawable.ic_play_arrow, "Play/Pause", playPausePendingIntent);
+        // Add actions - single button to trigger events
+        builder.addAction(R.drawable.ic_play_arrow, "Trigger Event", triggerEventPendingIntent);
         builder.addAction(R.drawable.ic_stop, "Stop", stopPendingIntent);
 
         // Add media session token for lock screen controls

@@ -158,6 +158,19 @@ public class MainActivity extends AppCompatActivity {
         
         return null;
     }
+
+    // Static method to get the current MainActivity instance
+    private static MainActivity instance;
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        instance = this;
+    }
+    
+    public static MainActivity getInstance() {
+        return instance;
+    }
     
     @Override
     protected void onPause() {

@@ -46,6 +46,23 @@ public class PlayerService extends Service {
             }
         }
         
+        // Handle notification actions
+        if (intent != null && intent.getAction() != null) {
+            switch (intent.getAction()) {
+                case "TRIGGER_EVENT":
+                    // Trigger next event (like the top button on PLAY screen)
+                    triggerNextEvent();
+                    break;
+                case "STOP":
+                    // Stop the show
+                    if (audioPlayerManager != null) {
+                        audioPlayerManager.stopAll();
+                    }
+                    stopForegroundService();
+                    break;
+            }
+        }
+        
         // Start as foreground service when audio is playing
         if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
             startForegroundService();
@@ -55,7 +72,6 @@ public class PlayerService extends Service {
 
     private void configureMediaSession() {
         // Media session configuration will be implemented later
-        // For now, we'll focus on basic background playback
     }
 
     private boolean handleMediaButtonEvent(Intent mediaButtonEvent) {
@@ -105,6 +121,42 @@ public class PlayerService extends Service {
         }
 
         return isSuccess;
+    }
+
+    private void triggerNextEvent() {
+        // Forward the event trigger to the PlayFragment if the app is in foreground
+        MainActivity activity = getMainActivity();
+        if (activity != null) {
+            PlayFragment playFragment = activity.getCurrentPlayFragment();
+            if (playFragment != null) {
+                playFragment.handleButtonPress();
+            }
+        } else {
+            // If app is in background, trigger the event directly using the service's audio player
+            if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
+                // Simulate button press by triggering the next event
+                android.util.Log.i("PlayerService", "TRIGGER_EVENT: Simulating button press in background");
+                // For now, we'll just pause/play as a simple action
+                audioPlayerManager.pauseAll();
+                new android.os.Handler().postDelayed(() -> {
+                    if (audioPlayerManager != null) {
+                        // Resume playback after brief pause
+                        // In a full implementation, this would advance to the next event
+                        audioPlayerManager.resumeTrack(0); // Simplified - assumes track 0
+                    }
+                }, 500);
+            }
+        }
+    }
+
+    private MainActivity getMainActivity() {
+        // Try to get the MainActivity instance
+        try {
+            // This is a simplified approach - in a real app you'd use a better communication method
+            return MainActivity.getInstance();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -179,13 +231,13 @@ public class PlayerService extends Service {
             if (intent.getAction() != null) {
                 Intent serviceIntent = new Intent(context, PlayerService.class);
                 switch (intent.getAction()) {
-                    case "PLAY_PAUSE":
-                        // Forward to service
-                        serviceIntent.setAction("PLAY_PAUSE");
+                    case "TRIGGER_EVENT":
+                        // Trigger next event (like the top button on PLAY screen)
+                        serviceIntent.setAction("TRIGGER_EVENT");
                         context.startService(serviceIntent);
                         break;
                     case "STOP":
-                        // Forward to service
+                        // Stop the show
                         serviceIntent.setAction("STOP");
                         context.startService(serviceIntent);
                         break;
