@@ -83,6 +83,10 @@ public class PlayFragment extends Fragment {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null && activity.playerService != null) {
             activity.playerService.startForegroundService();
+        } else {
+            // If service is not bound, start it directly
+            Intent serviceIntent = new Intent(getContext(), com.example.onebuttonplayer.player.PlayerService.class);
+            getContext().startService(serviceIntent);
         }
 
         // Visual feedback

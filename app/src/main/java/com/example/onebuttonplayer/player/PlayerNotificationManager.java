@@ -32,15 +32,21 @@ public class PlayerNotificationManager {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                "One Button Player",
-                NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setDescription("Media playback controls");
-            channel.setShowBadge(false);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            notificationManager.createNotificationChannel(channel);
+            // Check if channel already exists
+            if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+                NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "One Button Player",
+                    NotificationManager.IMPORTANCE_LOW
+                );
+                channel.setDescription("Media playback controls");
+                channel.setShowBadge(false);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                channel.setSound(null, null); // No sound for media notifications
+                channel.enableLights(false);
+                channel.enableVibration(false);
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 
@@ -94,7 +100,8 @@ public class PlayerNotificationManager {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setPriority(Notification.PRIORITY_LOW);
+                .setPriority(Notification.PRIORITY_LOW)
+                .setCategory(Notification.CATEGORY_SERVICE);
 
         // Add actions - single button to trigger events
         builder.addAction(R.drawable.ic_play_arrow, "Trigger Event", triggerEventPendingIntent);

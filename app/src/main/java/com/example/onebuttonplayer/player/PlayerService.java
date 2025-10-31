@@ -39,10 +39,13 @@ public class PlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        android.util.Log.i("PlayerService", "onStartCommand called with action: " + (intent != null ? intent.getAction() : "null"));
+        
         // Handle media button events
         if (intent != null && Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
             KeyEvent keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                android.util.Log.i("PlayerService", "Media button pressed: " + keyEvent.getKeyCode());
                 handleMediaButtonEvent(intent);
             }
         }
@@ -52,10 +55,12 @@ public class PlayerService extends Service {
             switch (intent.getAction()) {
                 case "TRIGGER_EVENT":
                     // Trigger next event (like the top button on PLAY screen)
+                    android.util.Log.i("PlayerService", "TRIGGER_EVENT action received");
                     triggerNextEvent();
                     break;
                 case "STOP":
                     // Stop the show
+                    android.util.Log.i("PlayerService", "STOP action received");
                     if (audioPlayerManager != null) {
                         audioPlayerManager.stopAll();
                     }
@@ -66,13 +71,52 @@ public class PlayerService extends Service {
         
         // Start as foreground service when audio is playing
         if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
+            android.util.Log.i("PlayerService", "Audio is playing, starting foreground service");
             startForegroundService();
         }
         return START_STICKY;
     }
 
     private void configureMediaSession() {
-        // Media session configuration will be implemented later
+        try {
+            // Create media session for media button handling
+            mediaSession = new MediaSession.Builder(this)
+                .setSessionCallback(new MediaSession.SessionCallback() {
+                    @Override
+                    public void onPlay(MediaSession session, SessionPlayer player) {
+                        // Handle play command from media buttons
+                        if (audioPlayerManager != null && !audioPlayerManager.isPlaying()) {
+                            // Resume playback or trigger next event
+                            triggerNextEvent();
+                        }
+                    }
+
+                    @Override
+                    public void onPause(MediaSession session, SessionPlayer player) {
+                        // Handle pause command from media buttons
+                        if (audioPlayerManager != null && audioPlayerManager.isPlaying()) {
+                            audioPlayerManager.pauseAll();
+                        }
+                    }
+
+                    @Override
+                    public void onStop(MediaSession session, SessionPlayer player) {
+                        // Handle stop command from media buttons
+                        if (audioPlayerManager != null) {
+                            audioPlayerManager.stopAll();
+                            stopForegroundService();
+                        }
+                    }
+                })
+                .build();
+
+            // Set session active to receive media button events
+            mediaSession.setActive(true);
+            
+            android.util.Log.i("PlayerService", "MediaSession configured and active");
+        } catch (Exception e) {
+            android.util.Log.e("PlayerService", "Error configuring MediaSession", e);
+        }
     }
 
     private boolean handleMediaButtonEvent(Intent mediaButtonEvent) {
@@ -173,14 +217,21 @@ public class PlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        // Initialize managers if not already done
+        if (audioPlayerManager == null) {
+            audioPlayerManager = new AudioPlayerManager(this);
+        }
+        if (notificationManager == null) {
+            notificationManager = new PlayerNotificationManager(this);
+        }
+        
+        // Set up wake lock to keep CPU running when screen is off
         if (wakeLock == null) {
             PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
             wakeLock.setReferenceCounted(false);
         }
-
-        configureMediaSession();
-    }
 
     @Override
     public void onDestroy() {
@@ -205,11 +256,19 @@ public class PlayerService extends Service {
         if (notificationManager != null) {
             notificationManager.startForegroundNotification();
         }
+        // Acquire wake lock when service starts
+        if (wakeLock != null && !wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
     }
 
     public void stopForegroundService() {
         if (notificationManager != null) {
             notificationManager.stopForegroundNotification();
+        }
+        // Release wake lock when service stops
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
         }
     }
 
