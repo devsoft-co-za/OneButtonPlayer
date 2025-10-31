@@ -218,7 +218,7 @@ public class PlayerService extends Service {
         audioPlayerManager = null;
 
         if (mediaSession != null) {
-            mediaSession.close();
+            mediaSession.release();
         }
 
         super.onDestroy();
