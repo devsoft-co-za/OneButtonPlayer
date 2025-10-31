@@ -8,7 +8,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import androidx.media.session.MediaButtonReceiver;
+// MediaButtonReceiver temporarily disabled
+// import androidx.media.session.MediaButtonReceiver;
 import android.view.KeyEvent;
 
 import com.example.onebuttonplayer.AudioPlayerManager;
