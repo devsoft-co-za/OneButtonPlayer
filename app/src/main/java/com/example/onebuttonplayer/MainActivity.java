@@ -157,23 +157,21 @@ public class MainActivity extends AppCompatActivity {
         }
         
         return null;
-    }
     
+    @Override
     @Override
     protected void onPause() {
         super.onPause();
         // Don't pause audio when app goes to background - let service handle it
         // audioPlayerManager.pauseAll();
+    }
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         audioPlayerManager.cleanup();
         
         // Unbind from PlayerService
-        if (isServiceBound) {
-        // Unbind from PlayerService
-        if (isServiceBound) {
-            unbindService(serviceConnection);
             isServiceBound = false;
         }
     }
