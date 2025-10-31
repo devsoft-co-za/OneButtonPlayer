@@ -104,6 +104,16 @@ public class AudioPlayerManager {
         stopAll();
     }
 
+    // Method to check if any track is currently playing
+    public boolean isAnyTrackPlaying() {
+        for (MediaPlayer player : players.values()) {
+            if (player != null && player.isPlaying()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isPlaying() {
         return isPlaying;
     }
