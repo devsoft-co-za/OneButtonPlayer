@@ -1,6 +1,7 @@
 package com.example.onebuttonplayer;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +95,7 @@ public class PlayFragment extends Fragment {
         if (view != null) {
             android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
             statusIndicator.setBackgroundColor(android.graphics.Color.GREEN);
-            new android.os.Handler().postDelayed(() -> 
+            new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> 
                 statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null)), 300);
         }
     }
@@ -209,7 +210,7 @@ public class PlayFragment extends Fragment {
             // Visual feedback
             android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
             statusIndicator.setBackgroundColor(android.graphics.Color.YELLOW);
-            new android.os.Handler().postDelayed(() -> 
+            new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> 
                 statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark, null)), 300);
         }
     }

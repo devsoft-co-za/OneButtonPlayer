@@ -25,11 +25,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
+
 }
+
+
+
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'

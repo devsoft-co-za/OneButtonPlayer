@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
@@ -68,7 +69,11 @@ public class PlayerNotificationManager {
     }
 
     public void stopForegroundNotification() {
-        playerService.stopForeground(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            playerService.stopForeground(Service.STOP_FOREGROUND_REMOVE);
+        } else {
+            playerService.stopForeground(true);
+        }
     }
 
     public void updateNotification() {

@@ -46,7 +46,12 @@ public class PlayerService extends Service {
         
         // Handle media button events
         if (intent != null && Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
-            KeyEvent keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            KeyEvent keyEvent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
+            } else {
+                keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            }
             if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
                 android.util.Log.i("PlayerService", "Media button pressed: " + keyEvent.getKeyCode());
                 handleMediaButtonEvent(intent);
@@ -89,8 +94,7 @@ public class PlayerService extends Service {
             mediaSession.setActive(true);
             
             // Set media session flags to receive media button events
-            mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | 
-                                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
             
             // Set playback state to indicate we can handle media buttons
             PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
@@ -156,7 +160,12 @@ public class PlayerService extends Service {
             return false;
         }
 
-        KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+        KeyEvent keyEvent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
+        } else {
+            keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+        }
 
         if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyEvent.getKeyCode()) {
