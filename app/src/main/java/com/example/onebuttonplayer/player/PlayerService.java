@@ -13,6 +13,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
+import androidx.core.os.BundleCompat; // Added this import
+
 import com.example.onebuttonplayer.AudioPlayerManager;
 import com.example.onebuttonplayer.MainActivity;
 import com.example.onebuttonplayer.PlayFragment;
@@ -46,11 +48,11 @@ public class PlayerService extends Service {
         
         // Handle media button events
         if (intent != null && Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
-            KeyEvent keyEvent;
+            KeyEvent keyEvent = null; // Initialized keyEvent
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
             } else {
-                keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                keyEvent = BundleCompat.getParcelable(intent.getExtras(), Intent.EXTRA_KEY_EVENT, KeyEvent.class); // Using BundleCompat
             }
             if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
                 android.util.Log.i("PlayerService", "Media button pressed: " + keyEvent.getKeyCode());
@@ -160,11 +162,11 @@ public class PlayerService extends Service {
             return false;
         }
 
-        KeyEvent keyEvent;
+        KeyEvent keyEvent = null; // Initialized keyEvent
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
         } else {
-            keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            keyEvent = BundleCompat.getParcelable(mediaButtonEvent.getExtras(), Intent.EXTRA_KEY_EVENT, KeyEvent.class); // Using BundleCompat
         }
 
         if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {

@@ -68,6 +68,7 @@ public class PlayerNotificationManager {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void stopForegroundNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             playerService.stopForeground(Service.STOP_FOREGROUND_REMOVE);
