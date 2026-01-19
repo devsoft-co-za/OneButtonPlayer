@@ -56,6 +56,10 @@ public class ConfigureFragment extends Fragment {
 
         // Setup UI components
         setupUI(view);
+        
+        // Clear any residual UI state
+        updateSelectedFilesList();
+        updateEventsList();
 
         return view;
     }
@@ -71,10 +75,12 @@ public class ConfigureFragment extends Fragment {
 
         // Setup other buttons (to be implemented)
         Button addEventBtn = view.findViewById(R.id.addEventBtn);
+        Button undoEventBtn = view.findViewById(R.id.undoEventBtn);
         Button saveShowBtn = view.findViewById(R.id.saveShowBtn);
         Button clearShowBtn = view.findViewById(R.id.clearShowBtn);
 
         addEventBtn.setOnClickListener(v -> showEventDialog());
+        undoEventBtn.setOnClickListener(v -> undoLastEvent());
         saveShowBtn.setOnClickListener(v -> saveShow());
         clearShowBtn.setOnClickListener(v -> clearShow());
     }
@@ -275,6 +281,19 @@ public class ConfigureFragment extends Fragment {
         Toast.makeText(getContext(), "Event added: " + eventType + " - " + trackName, Toast.LENGTH_SHORT).show();
     }
 
+    private void undoLastEvent() {
+        Show currentShow = showManager.getCurrentShow();
+        if (currentShow == null || currentShow.getEvents().isEmpty()) {
+            Toast.makeText(getContext(), "No events to undo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Remove the last event
+        int lastIndex = currentShow.getEvents().size() - 1;
+        ShowEvent removedEvent = currentShow.getEvents().remove(lastIndex);
+        updateEventsList();
+        Toast.makeText(getContext(), "Event removed: " + removedEvent.getType() + " - " + removedEvent.getTrackName(), Toast.LENGTH_SHORT).show();
+    }
 private void updateEventsList() {
     eventsListContainer.removeAllViews();
 

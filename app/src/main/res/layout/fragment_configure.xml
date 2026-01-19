@@ -80,13 +80,31 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/addEventBtn"
+        <!-- Event Buttons Row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add Event"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="?attr/colorAccent" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/addEventBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add Event"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="?attr/colorAccent" />
+
+            <Button
+                android:id="@+id/undoEventBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Undo Last Event"
+                android:backgroundTint="@android:color/holo_orange_dark" />
+
+        </LinearLayout>
 
         <!-- Events List -->
         <TextView
