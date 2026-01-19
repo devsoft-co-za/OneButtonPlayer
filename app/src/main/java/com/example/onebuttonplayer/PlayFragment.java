@@ -1,6 +1,7 @@
 package com.example.onebuttonplayer;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,12 +80,22 @@ public class PlayFragment extends Fragment {
         audioPlayerManager.setCurrentEventIndex(0);
         updatePlayScreen();
 
+        // Start foreground service for background playback
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.playerService != null) {
+            activity.playerService.startForegroundService();
+        } else {
+            // If service is not bound, start it directly
+            android.content.Intent serviceIntent = new android.content.Intent(getContext(), com.example.onebuttonplayer.player.PlayerService.class);
+            getContext().startService(serviceIntent);
+        }
+
         // Visual feedback
         View view = getView();
         if (view != null) {
             android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
             statusIndicator.setBackgroundColor(android.graphics.Color.GREEN);
-            new android.os.Handler().postDelayed(() -> 
+            new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> 
                 statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null)), 300);
         }
     }
@@ -101,6 +112,13 @@ public class PlayFragment extends Fragment {
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
         android.util.Log.i("PlayFragment", "stopShow() - isPlaying=" + isPlaying + ", currentEventIndex=" + currentEventIndex);
+        
+        // Stop foreground service when playback stops
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.playerService != null) {
+            activity.playerService.stopForegroundService();
+        }
+        
         updatePlayScreen();
     }
 
@@ -192,7 +210,7 @@ public class PlayFragment extends Fragment {
             // Visual feedback
             android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
             statusIndicator.setBackgroundColor(android.graphics.Color.YELLOW);
-            new android.os.Handler().postDelayed(() -> 
+            new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> 
                 statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark, null)), 300);
         }
     }

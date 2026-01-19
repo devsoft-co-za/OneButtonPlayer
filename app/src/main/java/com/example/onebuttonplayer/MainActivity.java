@@ -1,9 +1,19 @@
 package com.example.onebuttonplayer;
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -17,13 +27,36 @@ import com.example.onebuttonplayer.AudioPlayerManager;
 import com.example.onebuttonplayer.PlayFragment;
 import com.example.onebuttonplayer.ConfigureFragment;
 import com.example.onebuttonplayer.LoadFragment;
+import com.example.onebuttonplayer.player.PlayerService;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_POST_NOTIFICATIONS = 1;
     
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
     private ShowManager showManager;
     private AudioPlayerManager audioPlayerManager;
+    public PlayerService playerService;
+    private boolean isServiceBound = false;
+    
+    // Service connection
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
+            playerService = binder.getInstance();
+            isServiceBound = true;
+            Log.i("MainActivity", "PlayerService connected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            playerService = null;
+            isServiceBound = false;
+            Log.i("MainActivity", "PlayerService disconnected");
+        }
+    };
     
     // Tab titles
     private final String[] tabTitles = {"Play", "Configure", "Load"};
@@ -32,6 +65,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        // Request notification permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_CODE_POST_NOTIFICATIONS);
+            }
+        }
         
         // Initialize managers
         showManager = new ShowManager(this);
@@ -42,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
         
         // Initialize the app
         initApp();
+        
+        // Bind to PlayerService
+        Intent serviceIntent = new Intent(this, PlayerService.class);
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
     
     private void setupViewPager() {
@@ -128,17 +175,37 @@ public class MainActivity extends AppCompatActivity {
         
         return null;
     }
+
+    // Static method to get the current MainActivity instance
+    private static MainActivity instance;
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        instance = this;
+    }
+    
+    public static MainActivity getInstance() {
+        return instance;
+    }
     
     @Override
     protected void onPause() {
         super.onPause();
-        audioPlayerManager.pauseAll();
+        // Don't pause audio when app goes to background - let service handle it
+        // audioPlayerManager.pauseAll();
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
         audioPlayerManager.cleanup();
+        
+        // Unbind from PlayerService
+        if (isServiceBound) {
+            unbindService(serviceConnection);
+            isServiceBound = false;
+        }
     }
 }
 

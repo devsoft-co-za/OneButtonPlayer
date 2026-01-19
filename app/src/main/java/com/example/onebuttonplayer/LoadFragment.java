@@ -88,7 +88,7 @@ public class LoadFragment extends Fragment {
                 createdDate = itemView.findViewById(R.id.createdDate);
 
                 itemView.setOnClickListener(v -> {
-                    int position = getAdapterPosition();
+                    int position = getBindingAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Show show = shows.get(position);
                         loadShow(show);
@@ -96,7 +96,7 @@ public class LoadFragment extends Fragment {
                 });
 
                 itemView.setOnLongClickListener(v -> {
-                    int position = getAdapterPosition();
+                    int position = getBindingAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Show show = shows.get(position);
                         showDeleteConfirmation(show, position);
