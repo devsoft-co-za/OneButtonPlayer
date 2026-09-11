@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Track/event card colours for DARK theme (white text on a dark card). -->
+    <color name="card_background">#FF1E1E1E</color>
+    <color name="card_text">#FFFFFFFF</color>
+</resources>

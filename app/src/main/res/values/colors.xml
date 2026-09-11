@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Track/event card colours for LIGHT theme.
+         A values-night copy of this file overrides them in dark mode. -->
+    <color name="card_background">#FFFFFFFF</color>
+    <color name="card_text">#FF000000</color>
+</resources>

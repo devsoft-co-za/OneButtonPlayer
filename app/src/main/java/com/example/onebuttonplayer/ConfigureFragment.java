@@ -199,8 +199,10 @@ public class ConfigureFragment extends Fragment {
             TextView fileView = new TextView(getContext());
             fileView.setText(file.getName());
             fileView.setPadding(8, 8, 8, 8);
-            fileView.setBackgroundColor(getResources().getColor(android.R.color.white, null));
+            // Theme-aware so the track name stays readable in light and dark mode.
+            fileView.setBackgroundColor(getResources().getColor(R.color.card_background, null));
             fileView.setTextAppearance(android.R.style.TextAppearance_Small);
+            fileView.setTextColor(getResources().getColor(R.color.card_text, null));
             selectedFilesContainer.addView(fileView);
         }
     }
@@ -312,8 +314,10 @@ private void updateEventsList() {
         TextView eventView = new TextView(getContext());
         eventView.setText(event.getType().toUpperCase() + " - " + event.getTrackName());
         eventView.setPadding(8, 8, 8, 8);
-        eventView.setBackgroundColor(getResources().getColor(android.R.color.white, null));
+        // Theme-aware so the event label stays readable in light and dark mode.
+        eventView.setBackgroundColor(getResources().getColor(R.color.card_background, null));
         eventView.setTextAppearance(android.R.style.TextAppearance_Small);
+        eventView.setTextColor(getResources().getColor(R.color.card_text, null));
         eventsListContainer.addView(eventView);
     }
 }
