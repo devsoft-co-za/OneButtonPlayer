@@ -140,7 +140,7 @@ public class PlayFragment extends Fragment {
         Button playBtn = view.findViewById(R.id.playBtn);
         if (playBtn != null) {
             if (isPlaying) {
-                playBtn.setText("Re-start");
+                playBtn.setText("START AGAIN");
                 playBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                         getResources().getColor(android.R.color.holo_orange_dark, null)));
             } else {
