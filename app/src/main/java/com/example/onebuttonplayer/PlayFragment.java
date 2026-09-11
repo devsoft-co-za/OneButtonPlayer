@@ -50,6 +50,10 @@ public class PlayFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Re-assert keep-screen-on if the show is still playing.
+        if (isPlaying && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setKeepScreenOn(true);
+        }
         // Update the screen whenever the fragment becomes visible
         updatePlayScreen();
     }
@@ -76,6 +80,10 @@ public class PlayFragment extends Fragment {
         }
 
         isPlaying = true;
+        // Keep the screen on so the app stays focused while the show plays.
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setKeepScreenOn(true);
+        }
         currentEventIndex = 0;
         audioPlayerManager.setCurrentEventIndex(0);
         updatePlayScreen();
@@ -103,6 +111,9 @@ public class PlayFragment extends Fragment {
     private void pauseShow() {
         isPlaying = false;
         audioPlayerManager.pauseAll();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setKeepScreenOn(false);
+        }
         updatePlayScreen();
     }
 
@@ -111,6 +122,9 @@ public class PlayFragment extends Fragment {
         isPlaying = false;
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setKeepScreenOn(false);
+        }
         android.util.Log.i("PlayFragment", "stopShow() - isPlaying=" + isPlaying + ", currentEventIndex=" + currentEventIndex);
 
         // Stop foreground service when playback stops
@@ -192,6 +206,9 @@ public class PlayFragment extends Fragment {
             updatePlayScreen();
             // Hide the foreground notification now that the show is over, so the
             // notification no longer misleadingly claims to be "playing".
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).setKeepScreenOn(false);
+            }
             MainActivity act = (MainActivity) getActivity();
             if (act != null && act.playerService != null) {
                 act.playerService.stopForegroundService();
@@ -260,6 +277,9 @@ public class PlayFragment extends Fragment {
     }
 
     public void resetPlayState() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setKeepScreenOn(false);
+        }
         isPlaying = false;
         currentEventIndex = 0;
         audioPlayerManager.setCurrentEventIndex(0);

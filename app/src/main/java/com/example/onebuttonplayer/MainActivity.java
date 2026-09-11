@@ -128,6 +128,19 @@ public class MainActivity extends AppCompatActivity {
         return showManager;
     }
     
+    /**
+     * Keeps the screen on (prevents it dimming/locking) while the show is playing.
+     * This keeps the app as the focused foreground window so media-button key events
+     * continue to be delivered to the Activity with priority over other apps.
+     */
+    public void setKeepScreenOn(boolean keepOn) {
+        if (keepOn) {
+            getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
     public AudioPlayerManager getAudioPlayerManager() {
         return audioPlayerManager;
     }
