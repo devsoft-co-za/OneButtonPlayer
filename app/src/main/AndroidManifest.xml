@@ -42,16 +42,6 @@
             </intent-filter>
         </service>
         
-        <!-- Fallback receiver: lets a media button reach the service even when
-             another app currently owns the active MediaSession. -->
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-
         <receiver android:name=".player.PlayerService$NotificationReceiver"
             android:exported="true">
             <intent-filter>

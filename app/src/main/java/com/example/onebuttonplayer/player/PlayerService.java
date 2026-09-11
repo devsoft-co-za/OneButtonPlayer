@@ -111,36 +111,18 @@ public class PlayerService extends Service {
             // Create media session for media button handling
             mediaSession = new MediaSessionCompat(this, "OneButtonPlayer");
             
-            // Legacy flags (ignored on API 26+) kept for older devices.
-            mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                    | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-
-            // Allow the lock screen/notification to open the app.
-            Intent sessionIntent = new Intent(this, MainActivity.class);
-            sessionIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent sessionActivity = PendingIntent.getActivity(this, 0, sessionIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            mediaSession.setSessionActivity(sessionActivity);
-
-            // Register a manifest broadcast receiver the system can fall back to when
-            // no session is selected as the media-button session.
-            try {
-                Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                mediaButtonIntent.setClass(this, androidx.media.session.MediaButtonReceiver.class);
-                PendingIntent mediaButtonReceiver = PendingIntent.getBroadcast(this, 0,
-                        mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                mediaSession.setMediaButtonReceiver(mediaButtonReceiver);
-            } catch (Exception e) {
-                android.util.Log.w("PlayerService", "Could not set media button receiver", e);
-            }
-
-            // Activate AFTER configuring the session so it becomes the most recently
-            // activated session (that is what wins media-button routing).
-            mediaSession.setActive(true);
-
             // Set playback state to indicate we can handle media buttons
-            // Publish a valid playback state so the session is a valid media-button target.
-            mediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_STOPPED));
+            PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(PlaybackStateCompat.ACTION_PLAY |
+                               PlaybackStateCompat.ACTION_PAUSE |
+                               PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                               PlaybackStateCompat.ACTION_STOP |
+                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
+            mediaSession.setPlaybackState(stateBuilder.build());
+
+            // Activate the session so it can receive media button events.
+            mediaSession.setActive(true);
             
             // Set media button event receiver
             mediaSession.setCallback(new MediaSessionCompat.Callback() {
@@ -411,39 +393,6 @@ public class PlayerService extends Service {
     public void onMediaButtonPressed(int keyCode) {
         android.util.Log.i("PlayerService", "onMediaButtonPressed keyCode=" + keyCode);
         triggerNextEvent();
-    }
-
-    /**
-     * Reflects real playback activity in the MediaSession. An up-to-date
-     * PlaybackState is required for the session to be treated as an active media
-     * session and therefore be eligible for media-button routing.
-     */
-    public void setMediaSessionPlaybackActive(boolean playing) {
-        if (mediaSession == null) {
-            return;
-        }
-        try {
-            int state = playing ? PlaybackStateCompat.STATE_PLAYING
-                    : PlaybackStateCompat.STATE_PAUSED;
-            mediaSession.setPlaybackState(buildPlaybackState(state));
-            if (playing) {
-                ensureMediaSessionActive();
-            }
-        } catch (Exception e) {
-            android.util.Log.e("PlayerService", "Error updating MediaSession state", e);
-        }
-    }
-
-    private PlaybackStateCompat buildPlaybackState(int state) {
-        return new PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY
-                        | PlaybackStateCompat.ACTION_PAUSE
-                        | PlaybackStateCompat.ACTION_PLAY_PAUSE
-                        | PlaybackStateCompat.ACTION_STOP
-                        | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                        | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
-                .build();
     }
 
     public MediaSessionCompat getMediaSession() {

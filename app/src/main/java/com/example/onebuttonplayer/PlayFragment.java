@@ -84,8 +84,6 @@ public class PlayFragment extends Fragment {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null && activity.playerService != null) {
             activity.playerService.startForegroundService();
-            // Publish "playing" so the system treats our MediaSession as active.
-            activity.playerService.setMediaSessionPlaybackActive(true);
         } else {
             // If service is not bound, start it directly
             android.content.Intent serviceIntent = new android.content.Intent(getContext(), com.example.onebuttonplayer.player.PlayerService.class);
@@ -105,10 +103,6 @@ public class PlayFragment extends Fragment {
     private void pauseShow() {
         isPlaying = false;
         audioPlayerManager.pauseAll();
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null && activity.playerService != null) {
-            activity.playerService.setMediaSessionPlaybackActive(false);
-        }
         updatePlayScreen();
     }
 
@@ -118,14 +112,13 @@ public class PlayFragment extends Fragment {
         currentEventIndex = 0;
         audioPlayerManager.stopAll();
         android.util.Log.i("PlayFragment", "stopShow() - isPlaying=" + isPlaying + ", currentEventIndex=" + currentEventIndex);
-        
+
         // Stop foreground service when playback stops
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null && activity.playerService != null) {
             activity.playerService.stopForegroundService();
-            activity.playerService.setMediaSessionPlaybackActive(false);
         }
-        
+
         updatePlayScreen();
     }
 
@@ -197,6 +190,12 @@ public class PlayFragment extends Fragment {
             currentEventIndex = 0;
             audioPlayerManager.setCurrentEventIndex(0);
             updatePlayScreen();
+            // Hide the foreground notification now that the show is over, so the
+            // notification no longer misleadingly claims to be "playing".
+            MainActivity act = (MainActivity) getActivity();
+            if (act != null && act.playerService != null) {
+                act.playerService.stopForegroundService();
+            }
             Toast.makeText(getContext(), "Show Complete!", Toast.LENGTH_SHORT).show();
             return;
         }
