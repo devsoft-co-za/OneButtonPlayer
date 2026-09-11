@@ -45,6 +45,19 @@ public class PlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         android.util.Log.i("PlayerService", "onStartCommand called with action: " + (intent != null ? intent.getAction() : "null"));
+
+        // The system can start this service through MediaButtonReceiver as a
+        // foreground service, so startForeground() must be called promptly or the
+        // OS will terminate us.
+        boolean startedForMediaButton = intent != null
+                && Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction());
+        if (startedForMediaButton) {
+            try {
+                startForegroundService();
+            } catch (Exception e) {
+                android.util.Log.w("PlayerService", "Could not start foreground service", e);
+            }
+        }
         
         // Handle media button events
         if (intent != null && Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
@@ -84,6 +97,12 @@ public class PlayerService extends Service {
             android.util.Log.i("PlayerService", "Audio is playing, starting foreground service");
             startForegroundService();
         }
+        // If a one-off media button woke us and nothing is playing, don't leave
+        // the foreground notification behind.
+        if (startedForMediaButton
+                && (audioPlayerManager == null || !audioPlayerManager.isPlaying())) {
+            stopForegroundService();
+        }
         return START_STICKY;
     }
 
@@ -92,22 +111,36 @@ public class PlayerService extends Service {
             // Create media session for media button handling
             mediaSession = new MediaSessionCompat(this, "OneButtonPlayer");
             
-            // Set session active to receive media button events
-            mediaSession.setActive(true);
-            
-            // Set media session flags to receive media button events
+            // Legacy flags (ignored on API 26+) kept for older devices.
+            mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+                    | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-            
+            // Allow the lock screen/notification to open the app.
+            Intent sessionIntent = new Intent(this, MainActivity.class);
+            sessionIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent sessionActivity = PendingIntent.getActivity(this, 0, sessionIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            mediaSession.setSessionActivity(sessionActivity);
+
+            // Register a manifest broadcast receiver the system can fall back to when
+            // no session is selected as the media-button session.
+            try {
+                Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                mediaButtonIntent.setClass(this, androidx.media.session.MediaButtonReceiver.class);
+                PendingIntent mediaButtonReceiver = PendingIntent.getBroadcast(this, 0,
+                        mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                mediaSession.setMediaButtonReceiver(mediaButtonReceiver);
+            } catch (Exception e) {
+                android.util.Log.w("PlayerService", "Could not set media button receiver", e);
+            }
+
+            // Activate AFTER configuring the session so it becomes the most recently
+            // activated session (that is what wins media-button routing).
+            mediaSession.setActive(true);
+
             // Set playback state to indicate we can handle media buttons
-            PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
-                    .setActions(PlaybackStateCompat.ACTION_PLAY | 
-                               PlaybackStateCompat.ACTION_PAUSE | 
-                               PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                               PlaybackStateCompat.ACTION_STOP |
-                               PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                               PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-            
-            mediaSession.setPlaybackState(stateBuilder.build());
+            // Publish a valid playback state so the session is a valid media-button target.
+            mediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_STOPPED));
             
             // Set media button event receiver
             mediaSession.setCallback(new MediaSessionCompat.Callback() {
@@ -136,6 +169,12 @@ public class PlayerService extends Service {
                 public void onSkipToNext() {
                     android.util.Log.i("PlayerService", "MediaSession callback: onSkipToNext");
                     triggerNextEvent();
+                }
+
+                @Override
+                public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
+                    android.util.Log.i("PlayerService", "MediaSession callback: onMediaButtonEvent");
+                    return handleMediaButtonEvent(mediaButtonIntent);
                 }
 
                 @Override
@@ -343,6 +382,68 @@ public class PlayerService extends Service {
         }
 
         super.onDestroy();
+    }
+
+    /**
+     * Ensures the MediaSession is active so the app remains a valid media-button
+     * target. Note: the system does NOT pick the "media button session" by how
+     * recently setActive() was called - since Android 8 it is the session of the
+     * app that most recently started audio playback, so this only guarantees the
+     * session is published; it does not change routing priority.
+     */
+    public void ensureMediaSessionActive() {
+        if (mediaSession == null) {
+            return;
+        }
+        try {
+            if (!mediaSession.isActive()) {
+                mediaSession.setActive(true);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("PlayerService", "Error activating MediaSession", e);
+        }
+    }
+
+    /**
+     * Entry point for media buttons captured by the foreground Activity. Keeps a
+     * single handling path regardless of where the key event was intercepted.
+     */
+    public void onMediaButtonPressed(int keyCode) {
+        android.util.Log.i("PlayerService", "onMediaButtonPressed keyCode=" + keyCode);
+        triggerNextEvent();
+    }
+
+    /**
+     * Reflects real playback activity in the MediaSession. An up-to-date
+     * PlaybackState is required for the session to be treated as an active media
+     * session and therefore be eligible for media-button routing.
+     */
+    public void setMediaSessionPlaybackActive(boolean playing) {
+        if (mediaSession == null) {
+            return;
+        }
+        try {
+            int state = playing ? PlaybackStateCompat.STATE_PLAYING
+                    : PlaybackStateCompat.STATE_PAUSED;
+            mediaSession.setPlaybackState(buildPlaybackState(state));
+            if (playing) {
+                ensureMediaSessionActive();
+            }
+        } catch (Exception e) {
+            android.util.Log.e("PlayerService", "Error updating MediaSession state", e);
+        }
+    }
+
+    private PlaybackStateCompat buildPlaybackState(int state) {
+        return new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY
+                        | PlaybackStateCompat.ACTION_PAUSE
+                        | PlaybackStateCompat.ACTION_PLAY_PAUSE
+                        | PlaybackStateCompat.ACTION_STOP
+                        | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                        | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+                .build();
     }
 
     public MediaSessionCompat getMediaSession() {

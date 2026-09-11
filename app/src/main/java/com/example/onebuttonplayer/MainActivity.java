@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
             playerService = binder.getInstance();
             isServiceBound = true;
             Log.i("MainActivity", "PlayerService connected");
+            // Make sure our session is active so we are a valid media-button target.
+            playerService.ensureMediaSessionActive();
         }
 
         @Override
@@ -135,6 +137,58 @@ public class MainActivity extends AppCompatActivity {
     }
     
     // Media button handling for hardware controls
+
+    /**
+     * Intercepts media-button key events (e.g. the Bluetooth HID foot switch)
+     * <em>before</em> they can be routed to any MediaSession.
+     *
+     * AOSP only hands a media key to the media-session framework when the focused
+     * window does not consume it, so consuming ACTION_DOWN/ACTION_UP here guarantees
+     * this app receives the button whenever it is the foreground app - even if
+     * another app has an active background MediaSession.
+     */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (isMediaButtonKey(event.getKeyCode())) {
+            Log.i("MainActivity", "Media key intercepted: " + event.getKeyCode()
+                    + " action=" + event.getAction() + " repeat=" + event.getRepeatCount());
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+                handleMediaButtonPress(event.getKeyCode());
+            }
+            // Consume both DOWN and UP so no MediaSession (ours or another app's) sees it.
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    private boolean isMediaButtonKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void handleMediaButtonPress(int keyCode) {
+        PlayFragment playFragment = getCurrentPlayFragment();
+        if (playFragment != null) {
+            playFragment.handleButtonPress();
+            return;
+        }
+        // No Play fragment available - let the service handle it directly.
+        if (playerService != null) {
+            playerService.onMediaButtonPressed(keyCode);
+        }
+    }
+
+    // Media button handling for hardware controls
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Handle media buttons
@@ -183,12 +237,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         instance = this;
+        // Make sure our session is active so we are a valid media-button target.
+        if (playerService != null) {
+            playerService.ensureMediaSessionActive();
+        }
     }
-    
+
     public static MainActivity getInstance() {
         return instance;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

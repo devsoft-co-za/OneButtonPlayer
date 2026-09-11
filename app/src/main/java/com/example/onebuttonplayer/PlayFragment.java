@@ -84,6 +84,8 @@ public class PlayFragment extends Fragment {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null && activity.playerService != null) {
             activity.playerService.startForegroundService();
+            // Publish "playing" so the system treats our MediaSession as active.
+            activity.playerService.setMediaSessionPlaybackActive(true);
         } else {
             // If service is not bound, start it directly
             android.content.Intent serviceIntent = new android.content.Intent(getContext(), com.example.onebuttonplayer.player.PlayerService.class);
@@ -103,6 +105,10 @@ public class PlayFragment extends Fragment {
     private void pauseShow() {
         isPlaying = false;
         audioPlayerManager.pauseAll();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.playerService != null) {
+            activity.playerService.setMediaSessionPlaybackActive(false);
+        }
         updatePlayScreen();
     }
 
@@ -117,6 +123,7 @@ public class PlayFragment extends Fragment {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null && activity.playerService != null) {
             activity.playerService.stopForegroundService();
+            activity.playerService.setMediaSessionPlaybackActive(false);
         }
         
         updatePlayScreen();
