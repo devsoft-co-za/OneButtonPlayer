@@ -60,11 +60,13 @@ public class PlayFragment extends Fragment {
 
     private void setupPlayControls(View view) {
         Button playBtn = view.findViewById(R.id.playBtn);
-        Button pauseBtn = view.findViewById(R.id.pauseBtn);
         Button stopBtn = view.findViewById(R.id.stopBtn);
 
+        // Red is fixed for Stop; the play button tint is set dynamically in updatePlayScreen().
+        stopBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                getResources().getColor(android.R.color.holo_red_dark, null)));
+
         playBtn.setOnClickListener(v -> startShow());
-        pauseBtn.setOnClickListener(v -> pauseShow());
         stopBtn.setOnClickListener(v -> stopShow());
 
         // Setup status indicator click handler
@@ -79,6 +81,8 @@ public class PlayFragment extends Fragment {
             return;
         }
 
+        // (Re)start from the beginning: stop anything playing and reset the position.
+        audioPlayerManager.stopAll();
         isPlaying = true;
         // Keep the screen on so the app stays focused while the show plays.
         if (getActivity() instanceof MainActivity) {
@@ -104,17 +108,9 @@ public class PlayFragment extends Fragment {
             android.widget.LinearLayout statusIndicator = view.findViewById(R.id.statusIndicator);
             statusIndicator.setBackgroundColor(android.graphics.Color.GREEN);
             new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> 
-                statusIndicator.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark, null)), 300);
+                statusIndicator.setBackgroundColor(getResources().getColor(
+                        isPlaying ? android.R.color.holo_green_dark : android.R.color.holo_blue_dark, null)), 300);
         }
-    }
-
-    private void pauseShow() {
-        isPlaying = false;
-        audioPlayerManager.pauseAll();
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setKeepScreenOn(false);
-        }
-        updatePlayScreen();
     }
 
     public void stopShow() {
@@ -139,6 +135,20 @@ public class PlayFragment extends Fragment {
     private void updatePlayScreen() {
         View view = getView();
         if (view == null) return;
+
+        // The Start button doubles as a re-start control while the show is playing.
+        Button playBtn = view.findViewById(R.id.playBtn);
+        if (playBtn != null) {
+            if (isPlaying) {
+                playBtn.setText("Re-start");
+                playBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        getResources().getColor(android.R.color.holo_orange_dark, null)));
+            } else {
+                playBtn.setText("START");
+                playBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        getResources().getColor(android.R.color.holo_green_dark, null)));
+            }
+        }
         
         TextView showName = view.findViewById(R.id.showName);
         TextView eventCount = view.findViewById(R.id.eventCount);
