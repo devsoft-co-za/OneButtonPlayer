@@ -21,6 +21,10 @@ public class AudioPlayerManager {
     }
 
     public void playTrack(int trackIndex, String uri) {
+        playTrack(trackIndex, uri, false);
+    }
+
+    public void playTrack(int trackIndex, String uri, boolean loop) {
         try {
             // Stop any currently playing track
             stopAll();
@@ -40,6 +44,9 @@ public class AudioPlayerManager {
             
             player.setDataSource(context, Uri.parse(uri));
             player.prepare();
+            // MediaPlayer restarts the source forever when looping is enabled. The flag
+            // survives pause/resume, so only a stop (or a new track) actually ends it.
+            player.setLooping(loop);
             player.start();
 
             players.put(trackIndex, player);

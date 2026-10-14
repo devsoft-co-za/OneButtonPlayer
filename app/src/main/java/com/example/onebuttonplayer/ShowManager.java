@@ -97,7 +97,9 @@ public class ShowManager {
                         ShowEvent event = new ShowEvent(
                             jsonEvent.getString("type"),
                             jsonEvent.getInt("trackIndex"),
-                            jsonEvent.getString("trackName")
+                            jsonEvent.getString("trackName"),
+                            // Shows saved before looping existed have no "loop" key: they stay non-looping.
+                            jsonEvent.optBoolean("loop", false)
                         );
                         show.getEvents().add(event);
                     }
@@ -137,6 +139,7 @@ public class ShowManager {
                     jsonEvent.put("type", event.getType());
                     jsonEvent.put("trackIndex", event.getTrackIndex());
                     jsonEvent.put("trackName", event.getTrackName());
+                    jsonEvent.put("loop", event.isLoop());
                     eventsArray.put(jsonEvent);
                 }
                 jsonShow.put("events", eventsArray);

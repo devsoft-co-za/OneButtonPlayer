@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -224,6 +226,30 @@ public class ConfigureFragment extends Fragment {
             android.R.layout.simple_spinner_item, eventTypes);
         eventTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         eventTypeSpinner.setAdapter(eventTypeAdapter);
+
+        // "Loop" only makes sense for "start" events, so it starts hidden and is only
+        // revealed when the selected event type is "start".
+        CheckBox loopCheckBox = dialogView.findViewById(R.id.loopCheckBox);
+        loopCheckBox.setChecked(false);
+        loopCheckBox.setVisibility("start".equals(lastEventType) ? View.VISIBLE : View.GONE);
+
+        eventTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View item, int position, long id) {
+                boolean isStartEvent = "start".equals(eventTypes[position]);
+                loopCheckBox.setVisibility(isStartEvent ? View.VISIBLE : View.GONE);
+                if (!isStartEvent) {
+                    // Never let a stale tick leak into a pause/stop/resume event.
+                    loopCheckBox.setChecked(false);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                loopCheckBox.setVisibility(View.GONE);
+                loopCheckBox.setChecked(false);
+            }
+        });
         
         // Set last selected event type
         for (int i = 0; i < eventTypes.length; i++) {
@@ -262,13 +288,16 @@ public class ConfigureFragment extends Fragment {
                 lastEventType = eventType;
                 lastTrackIndex = trackIndex;
                 
-                addEventToShow(eventType, trackIndex, trackName);
+                // The checkbox is hidden for non-start types, so guard on the type too.
+                boolean loop = "start".equals(eventType) && loopCheckBox.isChecked();
+
+                addEventToShow(eventType, trackIndex, trackName, loop);
             })
             .setNegativeButton("Cancel", null)
             .show();
     }
 
-    private void addEventToShow(String eventType, int trackIndex, String trackName) {
+    private void addEventToShow(String eventType, int trackIndex, String trackName, boolean loop) {
         Show currentShow = showManager.getCurrentShow();
         if (currentShow == null) {
             currentShow = new Show(String.valueOf(System.currentTimeMillis()), "New Show");
@@ -277,7 +306,7 @@ public class ConfigureFragment extends Fragment {
             showManager.setCurrentShow(currentShow);
         }
         
-        ShowEvent event = new ShowEvent(eventType, trackIndex, trackName);
+        ShowEvent event = new ShowEvent(eventType, trackIndex, trackName, loop);
         currentShow.getEvents().add(event);
         updateEventsList();
         Toast.makeText(getContext(), "Event added: " + eventType + " - " + trackName, Toast.LENGTH_SHORT).show();
@@ -312,7 +341,11 @@ private void updateEventsList() {
 
     for (ShowEvent event : currentShow.getEvents()) {
         TextView eventView = new TextView(getContext());
-        eventView.setText(event.getType().toUpperCase() + " - " + event.getTrackName());
+        String eventLabel = event.getType().toUpperCase() + " - " + event.getTrackName();
+        if (event.isLoop()) {
+            eventLabel += "  [loop]";
+        }
+        eventView.setText(eventLabel);
         eventView.setPadding(8, 8, 8, 8);
         // Theme-aware so the event label stays readable in light and dark mode.
         eventView.setBackgroundColor(getResources().getColor(R.color.card_background, null));

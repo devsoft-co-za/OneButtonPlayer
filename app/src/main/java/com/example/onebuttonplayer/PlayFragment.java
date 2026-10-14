@@ -262,7 +262,7 @@ public class PlayFragment extends Fragment {
         
         switch (event.getType()) {
             case "start":
-                audioPlayerManager.playTrack(trackIndex, track.getUri());
+                audioPlayerManager.playTrack(trackIndex, track.getUri(), event.isLoop());
                 break;
             case "stop":
                 audioPlayerManager.stopTrack(trackIndex);

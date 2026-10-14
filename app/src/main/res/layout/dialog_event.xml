@@ -41,4 +41,13 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp" />
 
+    <!-- Loop only applies to "start" events; ConfigureFragment shows and hides it. -->
+    <CheckBox
+        android:id="@+id/loopCheckBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Loop"
+        android:visibility="gone" />
+
 </LinearLayout>
