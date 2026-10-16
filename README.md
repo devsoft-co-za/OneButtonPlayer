@@ -15,8 +15,7 @@ without ever touching their phone.
 2. **Event types** — each event is a *start*, *stop*, *pause* or *resume* action for a chosen track.
    Start events can optionally **loop** their track.
 3. **Save & organise** — keep multiple shows; the last used show is loaded automatically on launch.
-4. **Play one-handed** — every press of the remote (or the on-screen button) fires the next event in
-   the sequence.
+4. **Play hands-free** — every press of the remote fires the next event in the sequence.
 5. **No remote?** Use the large button on the **Play** screen instead.
 
 The app presents a clean three-screen interface:
