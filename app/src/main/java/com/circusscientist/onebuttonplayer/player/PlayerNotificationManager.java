@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer.player;
+package com.circusscientist.onebuttonplayer.player;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -16,8 +16,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.media.app.NotificationCompat.MediaStyle;
 
 
-import com.example.onebuttonplayer.MainActivity;
-import com.example.onebuttonplayer.R;
+import com.circusscientist.onebuttonplayer.MainActivity;
+import com.circusscientist.onebuttonplayer.R;
 
 public class PlayerNotificationManager {
     private static final String CHANNEL_ID = "onebuttonplayer_channel";

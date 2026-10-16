@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 import android.content.Context;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -22,12 +22,12 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 // Import custom classes
-import com.example.onebuttonplayer.ShowManager;
-import com.example.onebuttonplayer.AudioPlayerManager;
-import com.example.onebuttonplayer.PlayFragment;
-import com.example.onebuttonplayer.ConfigureFragment;
-import com.example.onebuttonplayer.LoadFragment;
-import com.example.onebuttonplayer.player.PlayerService;
+import com.circusscientist.onebuttonplayer.ShowManager;
+import com.circusscientist.onebuttonplayer.AudioPlayerManager;
+import com.circusscientist.onebuttonplayer.PlayFragment;
+import com.circusscientist.onebuttonplayer.ConfigureFragment;
+import com.circusscientist.onebuttonplayer.LoadFragment;
+import com.circusscientist.onebuttonplayer.player.PlayerService;
 
 public class MainActivity extends AppCompatActivity {
 

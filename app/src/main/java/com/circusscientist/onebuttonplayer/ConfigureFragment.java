@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -20,10 +20,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 // Import custom classes
-import com.example.onebuttonplayer.ShowManager;
-import com.example.onebuttonplayer.ShowFile;
-import com.example.onebuttonplayer.ShowEvent;
-import com.example.onebuttonplayer.Show;
+import com.circusscientist.onebuttonplayer.ShowManager;
+import com.circusscientist.onebuttonplayer.ShowFile;
+import com.circusscientist.onebuttonplayer.ShowEvent;
+import com.circusscientist.onebuttonplayer.Show;
 
 import java.util.ArrayList;
 import java.util.List;

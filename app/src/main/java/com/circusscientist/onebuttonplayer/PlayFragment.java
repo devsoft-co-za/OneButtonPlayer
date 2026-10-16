@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 import android.os.Bundle;
 import android.os.Looper;
@@ -11,9 +11,9 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 // Import custom classes
-import com.example.onebuttonplayer.ShowManager;
-import com.example.onebuttonplayer.AudioPlayerManager;
-import com.example.onebuttonplayer.Show;
+import com.circusscientist.onebuttonplayer.ShowManager;
+import com.circusscientist.onebuttonplayer.AudioPlayerManager;
+import com.circusscientist.onebuttonplayer.Show;
 import java.util.List;
 
 public class PlayFragment extends Fragment {
@@ -98,7 +98,7 @@ public class PlayFragment extends Fragment {
             activity.playerService.startForegroundService();
         } else {
             // If service is not bound, start it directly
-            android.content.Intent serviceIntent = new android.content.Intent(getContext(), com.example.onebuttonplayer.player.PlayerService.class);
+            android.content.Intent serviceIntent = new android.content.Intent(getContext(), com.circusscientist.onebuttonplayer.player.PlayerService.class);
             getContext().startService(serviceIntent);
         }
 

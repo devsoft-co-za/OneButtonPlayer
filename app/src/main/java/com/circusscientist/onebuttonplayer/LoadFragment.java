@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 // Import custom classes
-import com.example.onebuttonplayer.ShowManager;
+import com.circusscientist.onebuttonplayer.ShowManager;
 
 public class LoadFragment extends Fragment {
 

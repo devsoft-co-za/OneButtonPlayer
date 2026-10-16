@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.onebuttonplayer"
+    namespace = "com.circusscientist.onebuttonplayer"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.onebuttonplayer"
+        applicationId = "com.circusscientist.onebuttonplayer"
         minSdk = 25
         targetSdk = 36
         versionCode = 3

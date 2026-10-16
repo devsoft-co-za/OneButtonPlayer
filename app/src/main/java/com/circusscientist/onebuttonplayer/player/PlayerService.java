@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer.player;
+package com.circusscientist.onebuttonplayer.player;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -15,13 +15,13 @@ import android.view.KeyEvent;
 
 import androidx.core.os.BundleCompat; // Added this import
 
-import com.example.onebuttonplayer.AudioPlayerManager;
-import com.example.onebuttonplayer.MainActivity;
-import com.example.onebuttonplayer.PlayFragment;
-import com.example.onebuttonplayer.Show;
-import com.example.onebuttonplayer.ShowEvent;
-import com.example.onebuttonplayer.ShowFile;
-import com.example.onebuttonplayer.ShowManager;
+import com.circusscientist.onebuttonplayer.AudioPlayerManager;
+import com.circusscientist.onebuttonplayer.MainActivity;
+import com.circusscientist.onebuttonplayer.PlayFragment;
+import com.circusscientist.onebuttonplayer.Show;
+import com.circusscientist.onebuttonplayer.ShowEvent;
+import com.circusscientist.onebuttonplayer.ShowFile;
+import com.circusscientist.onebuttonplayer.ShowManager;
 
 public class PlayerService extends Service {
 

@@ -1,4 +1,4 @@
-package com.example.onebuttonplayer;
+package com.circusscientist.onebuttonplayer;
 
 public class ShowEvent {
     private String type; // "start", "stop", "pause", "resume"

@@ -12,9 +12,6 @@ local.properties
 build/
 app/build/
 
-# Gradle
-.gradle-wrapper.jar
-
 # Android Studio
 captures/
 .navigation/
